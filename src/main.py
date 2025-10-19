@@ -1,2 +1,2 @@
 if 1>0:
-    print("hola")
+    print("hola gonorreas")
