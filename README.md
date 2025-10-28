@@ -34,7 +34,7 @@ All interface mockups were designed using **Penpot** to visualize the core scree
 | **Resistors / Capacitors / Diodes / Sources / Switches / Transistors** | Pages to adjust electrical parameters (resistance, voltage, polarity, etc.). |
 | **Circuit Page** | Example of a complete circuit with *Run/Stop* simulation controls. |
 
-> The mockups maintain a visual style similar to *Crocodile Clips* but adapted to modern UX standards and the project’s domotic focus.
+> The mockups maintain a visual style similar to *Crocodile Clips*
 
 ---
 
