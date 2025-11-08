@@ -1,9 +1,9 @@
 from Component import component
 
-class probes(component):
+class sensor(component):
     def __init__(self):
         self.__type = ""
         self.__value = 0.0
-        self.__isConnected = False
-    def measure():
+        self.__unit = ""
+    def read():
         pass
