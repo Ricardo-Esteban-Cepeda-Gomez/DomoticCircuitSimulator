@@ -1,4 +1,3 @@
-from Component import component
 class component:
     def __init__(self):
         component.contador_id += 1
