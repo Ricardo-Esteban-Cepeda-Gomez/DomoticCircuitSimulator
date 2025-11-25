@@ -1,6 +1,6 @@
 from workspace import workspace
 
-class filemanager:
+class Filemanager:
     def save(self, ws: workspace, path: str):
         print(f"Saving workspace '{ws.name}' to {path}")
 

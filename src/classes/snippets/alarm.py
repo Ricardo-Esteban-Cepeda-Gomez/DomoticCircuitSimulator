@@ -1,7 +1,8 @@
 from Component import component
-class alarm(component):
+class Alarm(component):
     def __init__ (self):
-        isOn = False
+        is_on = False
         volume = 0
+        frecuency = 0
     def toggle(self):
-        self.isOn = not self.isOn 
+        self.is_on = not self.is_on 
