@@ -1,7 +1,7 @@
 from workspace import Workspace
 
 class Simulator:
-    def __init__(self, ws: workspace):
+    def __init__(self, ws: Workspace):
         self.workspace = ws
         self.time_step = 0.0
 

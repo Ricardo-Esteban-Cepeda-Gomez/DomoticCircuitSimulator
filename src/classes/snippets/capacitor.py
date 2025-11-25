@@ -1,6 +1,6 @@
-from classes.snippets.component import component
+from classes.snippets.component import Component
 
-class Capacitor(component):
+class Capacitor(Component):
     def __init__(self):
         self.capacitance = 0.0
         self.voltage = 0.0

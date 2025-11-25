@@ -1,6 +1,6 @@
 from classes.snippets.component import Component
 
-class Source(component):
+class Source(Component):
 
     def __init__(self):
         self.__type = "AC"

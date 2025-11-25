@@ -1,5 +1,6 @@
-from classes.snippets.component import component
-class Alarm(component):
+from classes.snippets.component import Component
+
+class Alarm(Component):
     def __init__ (self):
         is_on = False
         volume = 0
