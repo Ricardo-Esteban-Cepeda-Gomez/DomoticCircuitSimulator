@@ -1,15 +1,15 @@
-from Component import component
+from classes.snippets.component import component
 
-class workspace:
+class Workspace:
     def __init__(self, name=""):
         self.name = name
         self.components = []
         self.connections = []
 
-    def addComponent(self, component):
+    def add_component(self, component):
         self.components = self.components + [component]
 
-    def removeComponent(self, componentId):
+    def remove_component(self, componentId):
         new_list = []
         for c in self.components:
             if c._component__id != componentId:

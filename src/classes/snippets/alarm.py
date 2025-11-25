@@ -1,4 +1,4 @@
-from Component import component
+from classes.snippets.component import component
 class alarm(component):
     def __init__ (self):
         isOn = False

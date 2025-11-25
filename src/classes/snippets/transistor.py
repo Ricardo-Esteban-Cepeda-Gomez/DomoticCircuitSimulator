@@ -1,4 +1,4 @@
-from Component import component
+from classes.snippets.component import component
 
 class Transistor:
     def __init__(self, transistor_type: str, vt: float):
@@ -6,7 +6,7 @@ class Transistor:
         self.Vt = vt
         self.current = 0.0
     
-    def computeCurrent(self, voltage_in: float):
+    def compute_current(self, voltage_in: float):
         if voltage_in > self.Vt:
             self.current = (voltage_in - self.Vt) * 0.1
         else:
