@@ -1,9 +1,9 @@
-from classes.snippets.component import component
+from classes.snippets.component import Component
 
-class led(component):
+class Led(Component):
     def __init__(self, color):
         self.color = color
         self.__intensity = 3
     
-    def setIntensity(self, intensity: float):
+    def set_intensity(self, intensity: float):
         self.__intensity = intensity

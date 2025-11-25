@@ -1,9 +1,9 @@
-from workspace import workspace
+from workspace import Workspace
 
-class simulator:
+class Simulator:
     def __init__(self, ws: workspace):
         self.workspace = ws
-        self.timeStep = 0.0
+        self.time_step = 0.0
 
     def toggle(self):
         print("Simulation toggled")

@@ -1,9 +1,9 @@
-from classes.snippets.component import component
+from classes.snippets.component import Component
 
-class screen(component):
+class Screen(Component):
     def __init__(self):
         self.__brightness = 0.0
-        self.__isOn = False
+        self.__is_on = False
     def display(text: str):
         pass
     def clear():

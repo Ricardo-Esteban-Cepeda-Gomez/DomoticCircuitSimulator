@@ -1,10 +1,10 @@
-from classes.snippets.component import component
+from classes.snippets.component import Component
 
-class resistor(component):
+class Resistor(Component):
     def __init__(self):
         self.resistance = 0.0
         self.maxpotency = 0.0
-    def __reduceVoltage():
+    def __reduce_voltage():
         pass
-    def __reduceCurrent():
+    def __reduce_current():
         pass

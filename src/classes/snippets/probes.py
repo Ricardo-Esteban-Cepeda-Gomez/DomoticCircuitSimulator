@@ -1,9 +1,9 @@
-from classes.snippets.component import component
+from classes.snippets.component import Component
 
-class probes(component):
+class Probes(Component):
     def __init__(self):
         self.__type = ""
         self.__value = 0.0
-        self.__isConnected = False
+        self.__is_connected = False
     def measure():
         pass

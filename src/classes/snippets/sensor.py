@@ -1,6 +1,6 @@
-from classes.snippets.component import component
+from classes.snippets.component import Component
 
-class sensor(component):
+class Sensor(Component):
     def __init__(self):
         self.__type = ""
         self.__value = 0.0
