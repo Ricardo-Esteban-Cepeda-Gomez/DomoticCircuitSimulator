@@ -1,4 +1,4 @@
-from classes.snippets.component import component
+from classes.snippets.component import Component
 
 class Workspace:
     def __init__(self, name=""):
@@ -6,8 +6,8 @@ class Workspace:
         self.components = []
         self.connections = []
 
-    def add_component(self, component):
-        self.components = self.components + [component]
+    def add_component(self, Component):
+        self.components = self.components + [Component]
 
     def remove_component(self, componentId):
         new_list = []

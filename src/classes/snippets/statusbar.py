@@ -1,12 +1,12 @@
-from simulator import simulator
+from simulator import Simulator
 
-class statusbar:
-    def __init__(self, sim: simulator):
+class Statusbar:
+    def __init__(self, sim: Simulator):
         self.simulator = sim
-        self.currentMessage = ""
+        self.current_message = ""
 
     def displayMessage(self, message: str):
-        self.currentMessage = message
+        self.current_message = message
         print("Status:", message)
 
     def update(self, state: str):

@@ -1,8 +1,8 @@
-from workspace import workspace
-from simulator import simulator
+from workspace import Workspace
+from simulator import Simulator
 
 class Toolbar:
-    def __init__(self, ws: workspace, sim: simulator):
+    def __init__(self, ws: Workspace, sim: Simulator):
         self.workspace = ws
         self.simulator = sim
         self.tools = []

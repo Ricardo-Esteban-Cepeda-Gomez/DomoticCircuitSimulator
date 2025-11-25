@@ -1,8 +1,8 @@
-from classes.snippets.component import component
-class Switch(component):
+from classes.snippets.component import Component
+class Switch(Component):
     def __init__(self, label: str):
         self.label = label
-        self.isOn = False
+        self.is_on = False
 
     def toggle(self):
-        self.isOn = not self.isOn 
+        self.is_on = not self.is_on 

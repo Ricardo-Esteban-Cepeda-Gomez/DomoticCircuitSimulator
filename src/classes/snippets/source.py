@@ -1,4 +1,4 @@
-from classes.snippets.component import component
+from classes.snippets.component import Component
 
 class Source(component):
 
