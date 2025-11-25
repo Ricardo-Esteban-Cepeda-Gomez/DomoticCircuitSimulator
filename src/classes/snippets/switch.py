@@ -1,4 +1,4 @@
-from Component import component
+from classes.snippets.component import component
 class Switch(component):
     def __init__(self, label: str):
         self.label = label

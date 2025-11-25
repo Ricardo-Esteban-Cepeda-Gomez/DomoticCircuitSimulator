@@ -1,7 +1,7 @@
 from workspace import workspace
 from simulator import simulator
 
-class toolbar:
+class Toolbar:
     def __init__(self, ws: workspace, sim: simulator):
         self.workspace = ws
         self.simulator = sim
