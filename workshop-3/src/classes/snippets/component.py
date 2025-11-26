@@ -11,8 +11,9 @@ class Component(ABC):
         self.position_y = 0.0
         self.rotation = 0
         self.is_burned = False
-    @abstractmethod
+        self.input_current = 0.0
+        self.output_current = 0.0
     def burn(self):
-        pass
+        self.is_burned = True
     def fix_burn(self):
         self.is_burned = False

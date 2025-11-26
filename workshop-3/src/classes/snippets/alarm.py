@@ -5,5 +5,6 @@ class Alarm(Component):
         is_on = False
         volume = 0
         frecuency = 0
-    def toggle(self):
-        self.is_on = not self.is_on 
+    def on(self):
+        if self.input_current > 0:
+            self.is_on = True
