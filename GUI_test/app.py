@@ -35,7 +35,7 @@ class App:
         self.status.frame.pack(side="bottom", fill="x")
 
         # Controller
-        self.controller = Controller(self.toolbar, self.workspace, self.properties, self.status)
+        #self.controller = Controller(self.toolbar, self.workspace, self.properties, self.status)
 
     def run(self):
         self.root.mainloop()
