@@ -18,6 +18,8 @@ ctk.set_default_color_theme("dark-blue")
 root = ctk.CTk()
 root.title("BeeSmart")
 root.geometry("1200x700")
+root.overrideredirect(True)
+
 
 #Menu bar created
 menu_bar = Menubar(root)
