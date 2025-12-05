@@ -6,6 +6,7 @@ Authors:
 """
 import tkinter as tk
 import customtkinter as ctk
+from PIL import Image, ImageTk
 from GUI.menubar_view import Menubar
 from GUI.toolbar_view import Toolbar
 from GUI.workspace_view import Workspace
