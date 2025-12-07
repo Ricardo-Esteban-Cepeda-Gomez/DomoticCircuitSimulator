@@ -66,47 +66,6 @@ class Menubar:
         )
         self.helpbutton.pack(side="left")
 
-        #close
-        self.closebutton = ctk.CTkButton(
-            self.frame,
-            text="×",       
-            width=5,
-            fg_color="#ffffff",
-            text_color="black",
-            hover=False,
-            corner_radius=0,
-            font=self.menubar_font,
-            command=self.close_app
-        )
-        self.closebutton.pack(side="right")
-
-        #restorebutton
-        self.restorebutton = ctk.CTkButton(
-            self.frame,
-            text="🗖",        
-            width=5,
-            fg_color="#ffffff",
-            text_color="black",
-            hover=False,
-            corner_radius=0,
-            font=self.menubar_font,
-            command=self.toggle_maximize
-        )
-        self.restorebutton.pack(side="right")
-        #minimize
-        self.minimizebutton = ctk.CTkButton(
-            self.frame,
-            text="—",
-            width=5,
-            fg_color="#ffffff",
-            text_color="black",
-            hover=False,
-            corner_radius=0,
-            font=self.menubar_font,
-            command=self.minimize
-        )
-        self.minimizebutton.pack(side="right")
-
         #Title
         self.titlelabel = ctk.CTkLabel(
             self.frame,
@@ -116,11 +75,6 @@ class Menubar:
             font=self.menubar_font
         )
         self.titlelabel.pack(fill="x")
-
-        self.titlelabel.bind("<Button-1>", self.start_move)
-        self.titlelabel.bind("<ButtonRelease-1>", self.stop_move)
-        self.titlelabel.bind("<B1-Motion>", self.do_move)
-        
 
 
     # ==========================================================
@@ -322,57 +276,3 @@ class Menubar:
         if self.open_menu:
             self.open_menu.place_forget()
             self.open_menu = None
-    # ==========================================================
-    # MINIMIZE, WINDOW, CLOSE LOGIC
-    # ==========================================================
-
-    def minimize(self):
-        """with this we minimize the window"""
-        self.root.iconify()
-    
-    is_maximized = False
-    last_geometry = None
-    def toggle_maximize(self):
-        if not self.is_maximized:
-            # Save current size before maximizing
-            self.last_geometry = self.root.geometry()
-
-            # Maximize window
-            self.root.attributes("-zoomed", True)  # Linux
-            # self.root.state("zoomed")            # Windows alternative
-
-            self.is_maximized = True
-
-            # Change icon to "restore"
-            self.restorebutton.configure(text="🗗")
-        else:
-            # Restore last size
-            if self.last_geometry:
-                self.root.attributes("-zoomed", False)
-                self.root.geometry(self.last_geometry)
-
-            self.is_maximized = False
-
-            # Change icon back to "maximize"
-            self.restorebutton.configure(text="🗖")
-    def close_app(self):
-        self.root.destroy()
-
-    # ==========================================================
-    # MOVE WINDOW
-    # ==========================================================
-    
-    def start_move(self, event):
-        self.x = event.x
-        self.y = event.y
-
-    def stop_move(self, event):
-        self.x = None
-        self.y = None
-
-    def do_move(self, event):
-        deltax = event.x - self.x
-        deltay = event.y - self.y
-        new_x = self.root.winfo_x() + deltax
-        new_y = self.root.winfo_y() + deltay
-        self.root.geometry(f"+{new_x}+{new_y}")
