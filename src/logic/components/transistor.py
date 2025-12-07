@@ -1,7 +1,8 @@
 from classes.snippets.component import Component
 
-class Transistor:
+class Transistor(Component):
     def __init__(self, transistor_type: str, vt: float):
+        super().__init__()
         self.type = transistor_type
         self.Vt = vt
         self.current = 0.0
