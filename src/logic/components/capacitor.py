@@ -1,4 +1,4 @@
-from classes.snippets.component import Component
+from component import Component
 
 class Capacitor(Component):
     def __init__(self, capacitance:float = 1.0, voltage_limit:float = 10.0):

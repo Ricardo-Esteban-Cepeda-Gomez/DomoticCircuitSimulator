@@ -5,7 +5,9 @@ Authors:
     Sebastian Vanegas
 """
 import tkinter as tk
+import platform
 import customtkinter as ctk
+import os
 from PIL import Image, ImageTk
 from GUI.menubar_view import Menubar
 from GUI.toolbar_view import Toolbar
@@ -14,10 +16,26 @@ from GUI.statusbar_view import Statusbar
 
 ctk.set_default_color_theme("dark-blue")
 
+# Absolute path to the directory of this file
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+IMG_DIR = os.path.join(BASE_DIR, "GUI", "images")
+
+# Icon paths
+ICO_PATH = os.path.join(IMG_DIR, "bee.ico")
+PNG_PATH = os.path.join(IMG_DIR, "bee.png")
+
 #we create the main window
 root = ctk.CTk()
 root.title("BeeSmart")
 root.geometry("1200x700")
+os_name = platform.system()
+
+# Set icon
+if os_name == "Windows":
+    root.iconbitmap(ICO_PATH)
+else:
+    icon = tk.PhotoImage(file=PNG_PATH)
+    root.iconphoto(True, icon)
 
 
 #Menu bar created

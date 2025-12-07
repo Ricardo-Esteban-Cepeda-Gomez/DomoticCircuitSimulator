@@ -1,4 +1,4 @@
-from classes.snippets.component import Component
+from component import Component
 import time
 
 class Alarm(Component):

@@ -1,4 +1,4 @@
-from classes.snippets.component import Component
+from component import Component
 
 class Resistor(Component):
     def __init__(self, resistance: float = 100.0, max_power: float = 0.25):

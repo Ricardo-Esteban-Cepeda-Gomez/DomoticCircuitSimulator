@@ -1,4 +1,4 @@
-from classes.snippets.component import Component
+from component import Component
 
 class Probes(Component):
     def __init__(self, mode: str = "voltage"):

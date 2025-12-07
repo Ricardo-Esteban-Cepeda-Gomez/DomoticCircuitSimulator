@@ -1,4 +1,4 @@
-from classes.snippets.component import Component
+from components.component import Component
 
 class Workspace:
     def __init__(self, name=""):

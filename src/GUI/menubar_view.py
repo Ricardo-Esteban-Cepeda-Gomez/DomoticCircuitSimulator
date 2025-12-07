@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from PIL import Image
+import os
 
 class Menubar:
     def __init__(self, root):
@@ -16,9 +17,16 @@ class Menubar:
         self.menubar_font = ctk.CTkFont("Source Code Pro", 20)
 
         # Bee icon
+        # Absolute path to the directory of this file
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        IMG_DIR = os.path.join(BASE_DIR, "images")
+
+        # Icon paths
+        PNG_PATH = os.path.join(IMG_DIR, "bee.png")
+
         bee_image = ctk.CTkImage(
-            light_image=Image.open("src/GUI/images/bee.png"),
-            dark_image=Image.open("src/GUI/images/bee.png"),
+            light_image=Image.open(PNG_PATH),
+            dark_image=Image.open(PNG_PATH),
             size=(21, 21)
         )
         self.bee_label = ctk.CTkLabel(self.frame, image=bee_image, text="")
@@ -65,16 +73,6 @@ class Menubar:
             command=self.toggle_helpmenu
         )
         self.helpbutton.pack(side="left")
-
-        #Title
-        self.titlelabel = ctk.CTkLabel(
-            self.frame,
-            text=self.root.title(),
-            fg_color='transparent',
-            text_color="black",
-            font=self.menubar_font
-        )
-        self.titlelabel.pack(fill="x")
 
 
     # ==========================================================
