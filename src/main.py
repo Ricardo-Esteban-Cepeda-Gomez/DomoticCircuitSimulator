@@ -29,6 +29,9 @@ tool_bar = Toolbar(root)
 #Workspace canvas created
 workspace = Workspace(root)
 
+workspace.add_component(50, 50)
+workspace.add_component(50, 50)
+
 #Status bar creater
 statusbar = Statusbar(root)
 
