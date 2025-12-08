@@ -1,4 +1,11 @@
 from components.component import Component
+from components.source import Source
+from components.resistor import Resistor
+from components.switch import Switch
+from components.capacitor import Capacitor
+from components.led import Led
+from components.alarm import Alarm
+from components.probes import Probes
 
 class Workspace:
     def __init__(self, name=""):
@@ -8,6 +15,30 @@ class Workspace:
 
     def add_component(self, Component):
         self.components = self.components + [Component]
+
+    def create_component(self, comp_type, **kwargs):
+
+        component_map = {
+            "source": Source,
+            "resistor": Resistor,
+            "switch": Switch,
+            "capacitor": Capacitor,
+            "led": Led,
+            "alarm": Alarm,
+            "probe": Probes
+        }
+        
+        ComponentClass = component_map.get(comp_type)
+        if ComponentClass is None:
+            raise ValueError(f"Tipo de componente no válido: {comp_type}")
+        
+     
+        component = ComponentClass(**kwargs)
+        
+       
+        self.add_component(component)
+        
+        return component
 
     def remove_component(self, componentId):
         new_list = []
