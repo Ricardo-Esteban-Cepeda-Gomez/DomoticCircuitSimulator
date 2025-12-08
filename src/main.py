@@ -137,8 +137,13 @@ def load_workspace():
     global workspace
     workspace = Workspace(root)
     # Optional: add initial components
-    workspace.add_component(50, 50)
-    workspace.add_component(50, 50)
+    workspace.add_component(100, 100, "horizontal", "source")
+    workspace.add_component(250, 150, "vertical", "resistor")
+    workspace.add_component(400, 200, "horizontal", "led")
+    workspace.add_component(550, 250, "vertical", "alarm")
+    workspace.add_component(250, 150, "vertical", "probe")
+    workspace.add_component(400, 200, "horizontal", "probe")
+    workspace.add_component(550, 250, "horizontal", "alarm")
 
 def load_statusbar():
     global statusbar
