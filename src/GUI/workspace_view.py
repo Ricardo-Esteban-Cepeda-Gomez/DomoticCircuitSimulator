@@ -29,8 +29,8 @@ class Workspace():
 
         # body
         self.canvas.create_rectangle(x, y, x+w, y+h, 
-                                     fill="#4ea5ff", outline="black", 
-                                     tags=(group_id, "body", "movable"))
+                                    fill="#4ea5ff", outline="black", 
+                                    tags=(group_id, "body", "movable"))
 
         # Ports
         r = 5
