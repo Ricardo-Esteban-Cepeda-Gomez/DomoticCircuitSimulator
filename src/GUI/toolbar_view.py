@@ -25,7 +25,7 @@ class Toolbar:
         self.other_frame.pack(side="left", padx=10)
 
 
-        #import image of the bee botton
+        #import images
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         IMG_DIR = os.path.join(BASE_DIR, "images")
 
@@ -130,10 +130,119 @@ class Toolbar:
         self.Diode_button.pack(side="left", padx=5)
         Tooltip(self.Diode_button, "Diode Component")
 
+        LED_PATH = os.path.join(IMG_DIR, "led.png")
+
+        self.led_image = ctk.CTkImage(
+            light_image=Image.open(LED_PATH),
+            dark_image=Image.open(LED_PATH),
+        )
+
+        self.Led_button = ctk.CTkButton(
+            self.component_frame,
+            image=self.led_image,
+            text="",
+            fg_color=botton_color,
+            hover_color=botton_hover_color,
+            border_color="black",
+            border_width=1,
+            corner_radius=5
+            )
+        self.Led_button.pack(side="left", padx=5)
+        Tooltip(self.Led_button, "LED Component")
+
+        ALARM_PATH = os.path.join(IMG_DIR, "alarm.png")
+
+        self.alarm_image = ctk.CTkImage(
+            light_image=Image.open(ALARM_PATH),
+            dark_image=Image.open(ALARM_PATH),
+        )
+
+        self.Alarm_button = ctk.CTkButton(
+            self.component_frame,
+            image=self.alarm_image,
+            text="",
+            fg_color=botton_color,
+            hover_color=botton_hover_color,
+            border_color="black",
+            border_width=1,
+            corner_radius=5
+            )
+        self.Alarm_button.pack(side="left", padx=5)
+        Tooltip(self.Alarm_button, "Alarm Component")
+
+        PROBE_PATH = os.path.join(IMG_DIR, "probe.png")
+
+        self.probe_image = ctk.CTkImage(
+            light_image=Image.open(PROBE_PATH),
+            dark_image=Image.open(PROBE_PATH),
+        )
+
+        self.Probe_button = ctk.CTkButton(
+            self.other_frame,
+            image=self.probe_image,
+            text="",
+            fg_color=botton_color,
+            hover_color=botton_hover_color,
+            border_color="black",
+            border_width=1,
+            corner_radius=5
+            )
+        self.Probe_button.pack(side="left", padx=5)
+        Tooltip(self.Probe_button, "Probe Tool")
+
+        PAUSE_PATH = os.path.join(IMG_DIR, "pause.png")
+        PLAY_PATH = os.path.join(IMG_DIR, "play.png")
+
+        self.pause_play_image = ctk.CTkImage(
+            light_image=Image.open(PAUSE_PATH),
+            dark_image=Image.open(PAUSE_PATH),
+        )
+
+        self.Pause_play_button = ctk.CTkButton(
+            self.other_frame,
+            image=self.pause_play_image,
+            text="",
+            fg_color=botton_color,
+            hover_color=botton_hover_color,
+            border_color="black",
+            border_width=1,
+            corner_radius=5
+            )
+        self.Pause_play_button.pack(side="left", padx=5)
+        Tooltip(self.Pause_play_button, "Pause circuit")
 
         #With this command we can redraw using eigenvalues
         self.frame.pack_propagate(False)
+
+    # ==========================================================
+    # BATTERY MENU
+    # ==========================================================
+
+        self.battery_frame = ctk.CTkFrame(self.frame, fg_color="transparent")
+        self.battery_creation_frame = ctk.CTkFrame(self.battery_frame,
+                                                    fg_color="#b1b2b5",
+                                                    border_color="black",
+                                                    border_width=1,
+                                                    corner_radius=5)
+        self.battery_creation_frame.pack(side="left", padx=15)
+        self.battery_creation_entry = ctk.CTkEntry(self.battery_creation_frame, 
+                                                    placeholder_text='battery value...', 
+                                                    width=140,
+                                                    fg_color="#d2d3d6",
+                                                    border_color="black",
+                                                    border_width=1,
+                                                    textvariable= int)
+        self.battery_creation_entry.pack(side="left", padx=10)
+
+        def optionmenu_callback(choice):
+            print('optionmenu dropdown clicked:', choice)
         
+        optionmenu = ctk.CTkOptionMenu(self.battery_creation_frame,
+                                        values=['option 1', 'option 2'],
+                                        width=140, 
+                                        height=28,
+                                        command=optionmenu_callback)
+        optionmenu.pack(side="left", padx=)
 
     #we calculate the height of the toolbar
     def resize(self, event):
@@ -154,6 +263,18 @@ class Toolbar:
 
         self.Diode_button.configure(height=new_height*0.7, width=new_height*0.7)
         self.diode_image.configure(size=(new_height*0.7-10, new_height*0.7-10))
+
+        self.Led_button.configure(height=new_height*0.7, width=new_height*0.7)
+        self.led_image.configure(size=(new_height*0.7-10, new_height*0.7-10))
+
+        self.Alarm_button.configure(height=new_height*0.7, width=new_height*0.7)
+        self.alarm_image.configure(size=(new_height*0.7-10, new_height*0.7-10))
+
+        self.Probe_button.configure(height=new_height*0.7, width=new_height*0.7)
+        self.probe_image.configure(size=(new_height*0.7-10, new_height*0.7-10))
+
+        self.Pause_play_button.configure(height=new_height*0.7, width=new_height*0.7)
+        self.pause_play_image.configure(size=(new_height*0.7-10, new_height*0.7-10))
 
 
 class Tooltip:
