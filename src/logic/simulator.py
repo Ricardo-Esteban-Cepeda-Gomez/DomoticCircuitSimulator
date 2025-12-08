@@ -2,7 +2,7 @@ from workspace import Workspace
 
 class Simulator:
     def __init__(self, ws: Workspace):
-
+        # Reference to the Workspace where circuit components are stored
         self.workspace = ws
 
         self.time_step = 0.0
