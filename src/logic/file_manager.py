@@ -5,11 +5,11 @@ class FileManager:
 
     def save(self, ws: Workspace, path: str):
         with open(path, "wb") as f:
-            pickle.dump(ws, f)
-        print(f"Workspace '{ws.name}' guardado en {path}")
+            pickle.dump(workspace, f)
+        print(f"Workspace '{workspace.name}' guardado en {path}")
 
     def load(self, path: str) -> Workspace:
         with open(path, "rb") as f:
-            ws = pickle.load(f)
-        print(f"Workspace '{ws.name}' cargado desde {path}")
-        return ws
+            workspace = pickle.load(f)
+        print(f"Workspace '{workspace.name}' cargado desde {path}")
+        return workspace
