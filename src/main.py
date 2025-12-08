@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 """
 Authors:
     Ricardo Esteban Cepeda Gomez
@@ -179,3 +180,5 @@ root.update()  # Force splash to show
 # Start main loop
 # ------------------------
 root.mainloop()
+=======
+>>>>>>> Stashed changes

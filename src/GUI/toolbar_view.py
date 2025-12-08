@@ -5,6 +5,7 @@ import os
 class Toolbar:
     def __init__(self, root):
         self.root = root
+        self.controller = None
 
         #we make the drawing of the toolbar
         self.frame = ctk.CTkFrame(root, corner_radius=0, fg_color="#c8c8c8", border_width=0)
@@ -45,7 +46,8 @@ class Toolbar:
             hover_color=botton_hover_color,
             border_color="black",
             border_width=1,
-            corner_radius=5
+            corner_radius=5,
+            command=lambda: self.main("bee", 0, 0)
             )
         self.Bee_button.pack(side="left", padx=5)
         Tooltip(self.Bee_button, "Bee Tool \n This bee delete the components")
@@ -213,8 +215,10 @@ class Toolbar:
         def toogled_image():
             if self.Pause_play_button.cget("image") == self.pause_image:
                 self.Pause_play_button.configure(image=self.play_image)
+                self.main("pause", 0, 0)
             else:
                 self.Pause_play_button.configure(image=self.pause_image)
+                self.main("play", 0, 0)
 
         self.Pause_play_button = ctk.CTkButton(
             self.other_frame,
@@ -246,6 +250,36 @@ class Toolbar:
                                                     width=300)
         self.battery_creation_frame.pack_propagate(False)
         self.battery_creation_frame.pack(side="left", padx=15)
+
+        self.first_battery_value = ctk.StringVar()
+        self.battery_value = 0.0
+        self.selected_unit_battery = ctk.StringVar(value="____")
+
+        def recalc_value_battery(*args):
+            value_str = self.first_battery_value.get()
+            unit = self.selected_unit_battery.get()
+
+            try:
+                value = float(value_str)
+            except ValueError:
+                Tooltip(self.battery_creation_frame, "coloca un valor valido").show_tooltip()
+                return
+
+            if value <= 0:
+                return
+
+            if unit == 'μ':
+                self.battery_value = value * 1e-6
+            elif unit == 'm':
+                self.battery_value = value * 1e-3
+            elif unit == '____':
+                self.battery_value = value
+            elif unit == 'K':
+                self.battery_value = value * 1e3
+            elif unit == 'M':
+                self.battery_value = value * 1e6
+            print("Battery final value:", self.battery_value)
+
         self.battery_creation_entry = ctk.CTkEntry(self.battery_creation_frame, 
                                                     placeholder_text='battery value...', 
                                                     width=100,
@@ -254,17 +288,16 @@ class Toolbar:
                                                     border_color="black",
                                                     text_color="black",
                                                     border_width=1,
-                                                    textvariable= ctk.IntVar())
+                                                    textvariable= self.first_battery_value,)
         self.battery_creation_entry.pack(side="left", padx=10)
-
-        def optionmenu_callback(choice):
-            print('optionmenu dropdown clicked:', choice)
+        
+        self.first_battery_value.trace_add("write", recalc_value_battery)
         
         optionmenu_create_battery = ctk.CTkOptionMenu(self.battery_creation_frame,
-                                        values=['m', 'k','____','K','M'],
+                                        values=['μ', 'm','____','K','M'],
                                         width=100, 
                                         height=40,
-                                        command=optionmenu_callback,
+                                        command=lambda choice: (self.selected_unit_battery.set(choice), recalc_value_battery()),
                                         fg_color="#d2d3d6",
                                         button_color="#d2d3d6",
                                         button_hover_color="#9f9fa2",
@@ -272,6 +305,7 @@ class Toolbar:
                                         dropdown_hover_color="#9f9fa2",
                                         text_color="black",
                                         dropdown_text_color="black",
+                                        variable=self.selected_unit_battery
                                         )
         optionmenu_create_battery.pack(side="left", padx=5)
         optionmenu_create_battery.set("____")
@@ -298,7 +332,8 @@ class Toolbar:
             hover_color=botton_hover_color,
             border_color="black",
             border_width=1,
-            corner_radius=5
+            corner_radius=5,
+            command=lambda: self.main("battery", self.battery_value, 0)
             )
         self.Battery_button_create.pack(side="left", padx=5)
 
@@ -315,7 +350,8 @@ class Toolbar:
             hover_color=botton_hover_color,
             border_color="black",
             border_width=1,
-            corner_radius=5
+            corner_radius=5,
+            command=lambda: self.main("battery_rotate", self.battery_value, 0)
             )
         self.Battery_button_create_rotate.pack(side="left", padx=5)
 
@@ -350,32 +386,62 @@ class Toolbar:
                                                     width=300)
         self.resistor_creation_frame.pack_propagate(False)
         self.resistor_creation_frame.pack(side="left", padx=15)
+
+        self.first_resistor_value = ctk.StringVar()
+        self.resistor_value = 0.0
+        self.selected_unit_resistor = ctk.StringVar(value="____")
+
+        def recalc_value_resistor(*args):
+            value_str = self.first_resistor_value.get()
+            unit = self.selected_unit_resistor.get()
+
+            try:
+                value = float(value_str)
+            except ValueError:
+                Tooltip(self.resistor_creation_frame, "coloca un valor valido").show_tooltip()
+                return
+
+            if value <= 0:
+                return
+
+            if unit == 'μ':
+                self.resistor_value = value * 1e-6
+            elif unit == 'm':
+                self.resistor_value = value * 1e-3
+            elif unit == '____':
+                self.resistor_value = value
+            elif unit == 'K':
+                self.resistor_value = value * 1e3
+            elif unit == 'M':
+                self.resistor_value = value * 1e6
+            print("Resistor final value:", self.resistor_value)
+
         self.resistor_creation_entry = ctk.CTkEntry(self.resistor_creation_frame, 
-                                                    placeholder_text='Resistor value...', 
+                                                    placeholder_text='resistor value...', 
                                                     width=100,
                                                     height=40,
                                                     fg_color="#d2d3d6",
                                                     border_color="black",
                                                     text_color="black",
                                                     border_width=1,
-                                                    textvariable= ctk.IntVar())
+                                                    textvariable= self.first_resistor_value,)
         self.resistor_creation_entry.pack(side="left", padx=10)
-
-        def resistor_optionmenu_callback(choice):
-            print('optionmenu dropdown clicked:', choice)
+        
+        self.first_resistor_value.trace_add("write", recalc_value_resistor)
         
         optionmenu_create_resistor = ctk.CTkOptionMenu(self.resistor_creation_frame,
-                                        values=['m', 'k','____','K','M'],
+                                        values=['μ', 'm','____','K','M'],
                                         width=100, 
                                         height=40,
-                                        command=resistor_optionmenu_callback,
+                                        command=lambda choice: (self.selected_unit_resistor.set(choice), recalc_value_resistor()),
                                         fg_color="#d2d3d6",
                                         button_color="#d2d3d6",
                                         button_hover_color="#9f9fa2",
                                         dropdown_fg_color="#d2d3d6",
                                         dropdown_hover_color="#9f9fa2",
                                         text_color="black",
-                                        dropdown_text_color="black"
+                                        dropdown_text_color="black",
+                                        variable=self.selected_unit_resistor
                                         )
         optionmenu_create_resistor.pack(side="left", padx=5)
         optionmenu_create_resistor.set("____")
@@ -402,7 +468,8 @@ class Toolbar:
             hover_color=botton_hover_color,
             border_color="black",
             border_width=1,
-            corner_radius=5
+            corner_radius=5,
+            command=lambda: self.main("resistor", self.resistor_value, 0)
             )
         self.Resistor_button_create.pack(side="left", padx=5)
 
@@ -419,7 +486,8 @@ class Toolbar:
             hover_color=botton_hover_color,
             border_color="black",
             border_width=1,
-            corner_radius=5
+            corner_radius=5,
+            command=lambda: self.main("resistor_rotate", self.resistor_value, 0)
             )
         self.Resistor_button_create_rotate.pack(side="left", padx=5)
 
@@ -461,7 +529,8 @@ class Toolbar:
             hover_color=botton_hover_color,
             border_color="black",
             border_width=1,
-            corner_radius=5
+            corner_radius=5,
+            command=lambda: self.main("switch", 0, 0)
             )
         self.Switch_button_create.pack(side="left", padx=5)
 
@@ -478,7 +547,8 @@ class Toolbar:
             hover_color=botton_hover_color,
             border_color="black",
             border_width=1,
-            corner_radius=5
+            corner_radius=5,
+            command=lambda: self.main("switch_rotate", 0, 0)
             )
         self.Switch_button_create_rotate.pack(side="left", padx=5)
 
@@ -511,32 +581,62 @@ class Toolbar:
                                                     width=300)
         self.capacitor_creation_frame.pack_propagate(False)
         self.capacitor_creation_frame.pack(side="left", padx=15)
+
+        self.first_capacitor_value = ctk.StringVar()
+        self.capacitor_value = 0.0
+        self.selected_unit_capacitor = ctk.StringVar(value="____")
+
+        def recalc_value_capacitor(*args):
+            value_str = self.first_capacitor_value.get()
+            unit = self.selected_unit_capacitor.get()
+
+            try:
+                value = float(value_str)
+            except ValueError:
+                Tooltip(self.capacitor_creation_frame, "coloca un valor valido").show_tooltip()
+                return
+
+            if value <= 0:
+                return
+
+            if unit == 'μ':
+                self.capacitor_value = value * 1e-6
+            elif unit == 'm':
+                self.capacitor_value = value * 1e-3
+            elif unit == '____':
+                self.capacitor_value = value
+            elif unit == 'K':
+                self.capacitor_value = value * 1e3
+            elif unit == 'M':
+                self.capacitor_value = value * 1e6
+            print("Capacitor final value:", self.capacitor_value)
+
         self.capacitor_creation_entry = ctk.CTkEntry(self.capacitor_creation_frame, 
-                                                    placeholder_text='Capacitor value...', 
+                                                    placeholder_text='capacitor value...', 
                                                     width=100,
                                                     height=40,
                                                     fg_color="#d2d3d6",
                                                     border_color="black",
                                                     text_color="black",
                                                     border_width=1,
-                                                    textvariable= ctk.IntVar())
+                                                    textvariable= self.first_capacitor_value,)
         self.capacitor_creation_entry.pack(side="left", padx=10)
-
-        def capacitor_optionmenu_callback(choice):
-            print('optionmenu dropdown clicked:', choice)
+        
+        self.first_capacitor_value.trace_add("write", recalc_value_capacitor)
         
         optionmenu_create_capacitor = ctk.CTkOptionMenu(self.capacitor_creation_frame,
-                                        values=['m', 'k','____','K','M'],
+                                        values=['μ', 'm','____','K','M'],
                                         width=100, 
                                         height=40,
-                                        command=capacitor_optionmenu_callback,
+                                        command=lambda choice: (self.selected_unit_capacitor.set(choice), recalc_value_capacitor()),
                                         fg_color="#d2d3d6",
                                         button_color="#d2d3d6",
                                         button_hover_color="#9f9fa2",
                                         dropdown_fg_color="#d2d3d6",
                                         dropdown_hover_color="#9f9fa2",
                                         text_color="black",
-                                        dropdown_text_color="black"
+                                        dropdown_text_color="black",
+                                        variable=self.selected_unit_capacitor
                                         )
         optionmenu_create_capacitor.pack(side="left", padx=5)
         optionmenu_create_capacitor.set("____")
@@ -556,32 +656,58 @@ class Toolbar:
                                                     width=300)
         self.capacitor_creation_frame_F.pack_propagate(False)
         self.capacitor_creation_frame_F.pack(side="left", padx=15)
-        self.capacitor_creation_entry_F = ctk.CTkEntry(self.capacitor_creation_frame_F, 
-                                                    placeholder_text='Capacitor value...', 
+
+        self.first_capacitor_F_value = ctk.StringVar()
+        self.capacitor_F_value = 0.0
+        self.selected_unit_capacitor_F = ctk.StringVar(value="____")
+
+        def recalc_value_capacitor_F(*args):
+            value_str = self.first_capacitor_F_value.get()
+            unit = self.selected_unit_capacitor_F.get()
+
+            try:
+                value = float(value_str)
+            except ValueError:
+                Tooltip(self.capacitor_creation_frame_F, "coloca un valor valido").show_tooltip()
+                return
+
+            if value <= 0:
+                return
+
+            if unit == 'μ':
+                self.capacitor_F_value = value * 1e-6
+            elif unit == 'm':
+                self.capacitor_F_value = value * 1e-3
+            elif unit == '____':
+                self.capacitor_F_value = value
+            print("Capacitor final value:", self.capacitor_F_value)
+
+        self.capacitor_F_creation_entry = ctk.CTkEntry(self.capacitor_creation_frame_F, 
+                                                    placeholder_text='capacitor value...', 
                                                     width=100,
                                                     height=40,
                                                     fg_color="#d2d3d6",
                                                     border_color="black",
                                                     text_color="black",
                                                     border_width=1,
-                                                    textvariable= ctk.IntVar())
-        self.capacitor_creation_entry_F.pack(side="left", padx=10)
-
-        def capacitor_optionmenu_callback_F(choice):
-            print('optionmenu dropdown clicked:', choice)
+                                                    textvariable= self.first_capacitor_F_value,)
+        self.capacitor_F_creation_entry.pack(side="left", padx=10)
+        
+        self.first_capacitor_F_value.trace_add("write", recalc_value_capacitor_F)
         
         optionmenu_create_capacitor_F = ctk.CTkOptionMenu(self.capacitor_creation_frame_F,
-                                        values=['m', 'k','____','K','M'],
+                                        values=['μ', 'm','____'],
                                         width=100, 
                                         height=40,
-                                        command=capacitor_optionmenu_callback_F,
+                                        command=lambda choice: (self.selected_unit_capacitor_F.set(choice), recalc_value_capacitor_F()),
                                         fg_color="#d2d3d6",
                                         button_color="#d2d3d6",
                                         button_hover_color="#9f9fa2",
                                         dropdown_fg_color="#d2d3d6",
                                         dropdown_hover_color="#9f9fa2",
                                         text_color="black",
-                                        dropdown_text_color="black"
+                                        dropdown_text_color="black",
+                                        variable=self.selected_unit_capacitor_F
                                         )
         optionmenu_create_capacitor_F.pack(side="left", padx=5)
         optionmenu_create_capacitor_F.set("____")
@@ -609,7 +735,8 @@ class Toolbar:
             hover_color=botton_hover_color,
             border_color="black",
             border_width=1,
-            corner_radius=5
+            corner_radius=5,
+            command=lambda: self.main("capacitor", self.capacitor_value, self.capacitor_F_value)
             )
         self.Capacitor_button_create.pack(side="left", padx=5)
 
@@ -626,7 +753,8 @@ class Toolbar:
             hover_color=botton_hover_color,
             border_color="black",
             border_width=1,
-            corner_radius=5
+            corner_radius=5,
+            command=lambda: self.main("capacitor_rotate", self.capacitor_value, self.capacitor_F_value)
             )
         self.Capacitor_button_create_rotate.pack(side="left", padx=5)
 
@@ -668,7 +796,8 @@ class Toolbar:
             hover_color=botton_hover_color,
             border_color="black",
             border_width=1,
-            corner_radius=5
+            corner_radius=5,
+            command= lambda: self.main("led", 0, 0)
             )
         self.Led_button_create.pack(side="left", padx=5)
 
@@ -685,7 +814,8 @@ class Toolbar:
             hover_color=botton_hover_color,
             border_color="black",
             border_width=1,
-            corner_radius=5
+            corner_radius=5,
+            command=lambda: self.main("led_rotate", 0, 0)
             )
         self.Led_button_create_rotate.pack(side="left", padx=5)
 
@@ -719,10 +849,13 @@ class Toolbar:
                                                 corner_radius=5)
         self.alarm_checkbox_frame.pack(side="left")
 
+        self.dc_ac=True
+
         def alarm_dc_checkbox_event():
             self.alarm_ac_checkbox.deselect()
+            self.dc_ac=True
         
-        check_var_dc = ctk.BooleanVar(value=False)
+        check_var_dc = ctk.BooleanVar(value=True)
         self.alarm_dc_checkbox = ctk.CTkCheckBox(self.alarm_checkbox_frame, 
                                                 text='DC', 
                                                 command=alarm_dc_checkbox_event,
@@ -741,6 +874,8 @@ class Toolbar:
 
         def alarm_ac_checkbox_event():
             self.alarm_dc_checkbox.deselect()
+            self.dc_ac=False
+
         
         check_var_ac = ctk.BooleanVar(value=False)
         self.alarm_ac_checkbox = ctk.CTkCheckBox(self.alarm_checkbox_frame, 
@@ -759,6 +894,8 @@ class Toolbar:
                                                 font=(None, 20))
         self.alarm_ac_checkbox.pack(side="top", pady=1)
 
+
+
         self.alarm_buttons_frame = ctk.CTkFrame(self.alarm_frame, fg_color="transparent")
         self.alarm_buttons_frame.pack(side="right", padx=15)
 
@@ -775,7 +912,8 @@ class Toolbar:
             hover_color=botton_hover_color,
             border_color="black",
             border_width=1,
-            corner_radius=5
+            corner_radius=5,
+            command= lambda: self.main("Alarm", self.dc_ac, 0)
             )
         self.Alarm_button_create.pack(side="left", padx=5)
 
@@ -792,7 +930,8 @@ class Toolbar:
             hover_color=botton_hover_color,
             border_color="black",
             border_width=1,
-            corner_radius=5
+            corner_radius=5,
+            command= lambda: self.main("Alarm_rotate", self.dc_ac, 0)
             )
         self.Alarm_button_create_rotate.pack(side="left", padx=5)
 
@@ -827,10 +966,13 @@ class Toolbar:
                                                 corner_radius=5)
         self.probe_checkbox_frame.pack(side="left")
 
+        self.current_voltage=True
+
         def probe_current_checkbox_event():
             self.probe_voltage_checkbox.deselect()
-        
-        check_var_current = ctk.BooleanVar(value=False)
+            self.current_voltage=True
+
+        check_var_current = ctk.BooleanVar(value=True)
         self.probe_current_checkbox = ctk.CTkCheckBox(self.probe_checkbox_frame, 
                                                 text='Current', 
                                                 command=probe_current_checkbox_event,
@@ -849,6 +991,7 @@ class Toolbar:
 
         def probe_voltage_checkbox_event():
             self.probe_current_checkbox.deselect()
+            self.current_voltage=False
         
         check_var_voltage = ctk.BooleanVar(value=False)
         self.probe_voltage_checkbox = ctk.CTkCheckBox(self.probe_checkbox_frame, 
@@ -1050,6 +1193,12 @@ class Toolbar:
         self.probe_frame.pack_forget()
         self.component_frame.pack(side="left", padx=10)
         self.other_frame.pack(side="left", padx=10)
+
+    def set_controller(self, controller):
+        self.controller = controller
+
+    def main(self, button_name: str, parameter1, parameter2):
+        print(f"{button_name} pressed with parameter1: {parameter1} and parameter2: {parameter2}")
 
 class Tooltip:
     def __init__(self, widget, text, delay=300, fade_duration=200):
