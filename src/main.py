@@ -60,7 +60,7 @@ class SplashScreen(ctk.CTkToplevel):
         self.configure(fg_color="#1f1f1f")
 
         # -----------------------
-        # 🔥 Project Logo (PNG)
+        # Project Logo (PNG)
         # -----------------------
         self.logo = ctk.CTkImage(
             light_image=Image.open(icon_path),
