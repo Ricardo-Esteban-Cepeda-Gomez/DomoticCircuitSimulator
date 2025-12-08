@@ -1,8 +1,8 @@
-class Source:
+from component import Component
+
+class Source(Component):
     def __init__(self):
-        self.__type = "AC"
+        super().__init__()
+        self.__type = "DC"
         self.current = 0.0
         self.voltage = 0.0
-        self.position_x = 0.0
-        self.position_y = 0.0
-        self.rotation = 0

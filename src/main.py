@@ -12,7 +12,8 @@ import os
 from PIL import Image, ImageTk
 from GUI.menubar_view import Menubar
 from GUI.toolbar_view import Toolbar
-from GUI.workspace_view import Workspace
+from GUI.workspace_view import Workspace as WorkspaceGUI
+from logic.workspace import Workspace as WorkspaceLogic
 from GUI.statusbar_view import Statusbar
 
 ctk.set_default_color_theme("dark-blue")
@@ -134,11 +135,19 @@ def load_toolbar():
     tool_bar = Toolbar(root)
 
 def load_workspace():
-    global workspace
-    workspace = Workspace(root)
+    global workspace, logic_workspace
+    # Crear instancia lógica primero
+    logic_workspace = WorkspaceLogic("main_workspace")
+    # Crear instancia GUI pasando la lógica como parámetro
+    workspace = WorkspaceGUI(root, logic_workspace)
     # Optional: add initial components
-    workspace.add_component(50, 50)
-    workspace.add_component(50, 50)
+    workspace.add_component(100, 100, "horizontal", "source")
+    workspace.add_component(250, 150, "vertical", "resistor")
+    workspace.add_component(400, 200, "horizontal", "led")
+    workspace.add_component(550, 250, "vertical", "alarm")
+    workspace.add_component(250, 150, "vertical", "probe")
+    workspace.add_component(400, 200, "horizontal", "probe")
+    workspace.add_component(550, 250, "horizontal", "alarm")
 
 def load_statusbar():
     global statusbar
