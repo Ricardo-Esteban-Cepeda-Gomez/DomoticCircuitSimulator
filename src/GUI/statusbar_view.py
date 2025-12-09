@@ -1,10 +1,13 @@
 import customtkinter as ctk
+from simulator import Simulator   
 
 class Statusbar:
-    def __init__(self, root):
+    def __init__(self, root, simulator: Simulator = None):
         self.root = root
+        self.simulator = simulator
+        self.current_message = "Ready"
 
-        # We draw the status bar
+
         self.frame = ctk.CTkFrame(
             root, 
             fg_color="#ffffff", 
@@ -14,14 +17,22 @@ class Statusbar:
             border_width=2
         )
         self.frame.pack(side="bottom", fill="x")
-
-        # Prevent automatic resizing based on internal widgets
         self.frame.pack_propagate(False)
 
-        # Text label to display information
+
         self.label = ctk.CTkLabel(self.frame, text="Ready", text_color="#000000")
         self.label.pack(side="left", padx=10)
 
+
     def show(self, message: str):
-        """Displays any message on the status bar."""
-        self.label.configure(text=message)
+        self.current_message = message
+        self.label.configure(text=message)   
+
+
+    def update_status(self):
+        if not self.simulator:
+            return  
+
+        state = "Paused" if self.simulator.is_paused else "Running"
+        self.current_message = state
+        self.label.configure(text=f"Sim Status: {state}")  
