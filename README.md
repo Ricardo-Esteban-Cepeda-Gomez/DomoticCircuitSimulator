@@ -38,6 +38,7 @@ Keyboard shortcuts
 - Ctrl+O — Open project
 - Ctrl+Z — Undo
 - Ctrl+Y — Redo
+- F1     — Open the documentation
 - Delete — Delete selected component
 
 File format
