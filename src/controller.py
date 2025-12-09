@@ -1,6 +1,7 @@
 # controller.py
 from logic.simulator import Simulator
 from logic.file_manager import FileManager
+import webbrowser
 
 
 class Controller:
@@ -35,6 +36,7 @@ class Controller:
             self.root.bind_all("<Control-y>", lambda e: self.redo())
             self.root.bind_all("<Control-o>", lambda e: self.load_workspace())
             self.root.bind_all("<Control-s>", lambda e: self.save_workspace())
+            self.root.bind_all("<F1>", lambda e: self.help())
         except Exception:
             pass
     # ================================================================
@@ -206,3 +208,9 @@ class Controller:
                 return self.gui_workspace.redo()
         except Exception as e:
             print(f"[Controller] redo failed: {e}")
+
+    
+    def help(self):
+        """Open the help documentation in the default web browser."""
+        help_url = "https://github.com/Ricardo-Esteban-Cepeda-Gomez/DomoticCircuitSimulator?tab=readme-ov-file#domotic-circuit-simulator--beesmart"  # Replace with actual help URL
+        webbrowser.open(help_url)

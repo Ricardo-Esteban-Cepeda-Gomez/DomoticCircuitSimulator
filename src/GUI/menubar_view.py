@@ -153,7 +153,7 @@ class Menubar:
 
         menu = self.create_menu(bx, by + self.helpbutton.winfo_height())
 
-        self.create_menu_item(menu, "About")
+        self.create_menu_item(menu, "About (F1)")
 
         self.enable_close_after_delay(menu, self.helpbutton)
 
@@ -288,4 +288,6 @@ class Menubar:
             self.controller.undo()
         elif text == "Redo (Ctrl+Y)":
             self.controller.redo()
+        elif text == "About (F1)":
+            self.controller.help()
 

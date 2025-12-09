@@ -18,12 +18,20 @@ class Statusbar:
         self.frame.pack(side="bottom", fill="x")
         self.frame.pack_propagate(False)
 
-        self.frame_help = ctk.CTkFrame(self.frame, fg_color="transparent")
+        self.frame_help = ctk.CTkFrame(self.frame, 
+                                    fg_color="transparent",
+                                    corner_radius=0)
         self.frame_help.pack(side="left", padx=10)
-        
+        self.frame.pack_propagate(False)
 
-        self.frame_state = ctk.CTkFrame(self.frame, fg_color="transparent")
-        self.frame_state.pack(side="right", padx=10)
+        self.labelhelp = ctk.CTkLabel(self.frame_help, text='Press F1 for help', text_color="#000000")
+        self.labelhelp.pack(side="left", padx=10)
+
+        self.frame_state = ctk.CTkFrame(self.frame, 
+                                        fg_color="transparent",
+                                        border_color="black",
+                                        border_width=1, corner_radius=0)
+        self.frame_state.pack(side="right", fill="both")
 
         self.label = ctk.CTkLabel(self.frame_state, text="Sim Status: Running", text_color="#000000")
         self.label.pack(side="left", padx=10)
