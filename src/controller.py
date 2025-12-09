@@ -1,5 +1,6 @@
 class Controller:
-    def __init__(self, workspace):
-        pass
-    def send_info_workspace(name, parameter1, parameter2):
-        pass
+    def __init__(self):
+        self.workspace = None
+
+    def set_workspace(self, workspace):
+        self.workspace = workspace

@@ -1,10 +1,3 @@
-"""
-Authors:
-    Ricardo Esteban Cepeda Gomez
-    Johan Sebastian Lievano Garcia
-    Sebastian Vanegas
-"""
-
 import tkinter as tk
 import platform
 import customtkinter as ctk
@@ -27,41 +20,50 @@ ICO_PATH = os.path.join(IMG_DIR, "bee.ico")
 PNG_PATH = os.path.join(IMG_DIR, "bee.png")
 
 # ------------------------
-# Main App
+# Main Application Window
 # ------------------------
 root = ctk.CTk()
 root.title("BeeSmart")
 root.geometry("1200x700")
-os_name = platform.system()
 
-# Set icon
-if os_name == "Windows":
+# ------------------------
+# Set Application Icon
+# ------------------------
+if platform.system() == "Windows":
     root.iconbitmap(ICO_PATH)
 else:
     icon = tk.PhotoImage(file=PNG_PATH)
     root.iconphoto(True, icon)
 
-# ------------------------
-# COMPONENT CREATION (ORDER MATTERS)
-# ------------------------
+# ================================================================
+# GUI CREATION ORDER (visual stacking)
+# 1. Menubar     (top)
+# 2. Toolbar     (under the menubar)
+# 3. Workspace   (center area)
+# 4. Statusbar   (bottom)
+# ================================================================
 
-# 1) Workspace (GUI canvas)
-workspace = Workspace(root)
+# Create GUI components in the required visual order
+menu_bar = Menubar(root)          # Top menu bar
+tool_bar = Toolbar(root)          # Toolbar below the menubar
+workspace = Workspace(root)       # Main workspace area
+statusbar = Statusbar(root)       # Bottom status bar
 
-# 2) Controller (logic)
+# ================================================================
+# Controller setup (logic layer)
+# The controller is initialized after GUI components but does not
+# affect their visual order. It only links their interaction.
+# ================================================================
 controller = Controller()
+
+# Connect controller with workspace (logic → view)
 controller.set_workspace(workspace)
 
-# 3) Toolbar (needs controller)
-tool_bar = Toolbar(root)
+# Connect controller with toolbar (view → logic)
 tool_bar.set_controller(controller)
 
-# 4) Menubar
-menu_bar = Menubar(root)
-
-# 5) Statusbar
-statusbar = Statusbar(root)
-
+# If needed later:
+# menu_bar.set_controller(controller)
 
 # ------------------------
 # Resize handling for toolbar
@@ -69,6 +71,10 @@ statusbar = Statusbar(root)
 last_height = None
 
 def on_resize(event):
+    """
+    Resizes the toolbar only when the window height
+    changes significantly to avoid performance issues.
+    """
     global last_height
     if last_height is None or abs(event.height - last_height) > 5:
         tool_bar.resize(event.height)
@@ -76,8 +82,7 @@ def on_resize(event):
 
 root.bind("<Configure>", on_resize)
 
-
 # ------------------------
-# Start App
+# Start main loop
 # ------------------------
 root.mainloop()
