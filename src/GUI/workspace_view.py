@@ -338,7 +338,36 @@ class Workspace():
                 cx = cy = 0
 
             orientation = "vertical" if "vertical" in self.canvas.gettags(group_id) else "horizontal"
-            comp_type = logical.type if hasattr(logical, "type") else None
+            
+            # Obtener el tipo de componente del nombre de la clase
+            class_name = logical.__class__.__name__
+            comp_type_map = {
+                "Source": "source",
+                "Resistor": "resistor",
+                "Led": "led",
+                "Switch": "switch",
+                "Capacitor": "capacitor",
+                "Alarm": "alarm",
+                "Probes": "probe"
+            }
+            comp_type = comp_type_map.get(class_name)
+
+            # Extraer solo los parámetros serializables básicos
+            params = {}
+            if comp_type == "resistor" and hasattr(logical, "resistance"):
+                params = {"resistance": logical.resistance}
+            elif comp_type == "led" and hasattr(logical, "color"):
+                params = {"color": logical.color}
+            elif comp_type == "switch" and hasattr(logical, "label"):
+                params = {"label": logical.label}
+            elif comp_type == "capacitor" and hasattr(logical, "capacitance"):
+                params = {"capacitance": logical.capacitance}
+            elif comp_type == "alarm" and hasattr(logical, "frequency"):
+                params = {"frequency": logical.frequency}
+            elif comp_type == "probe" and hasattr(logical, "mode"):
+                params = {"mode": logical.mode}
+            elif comp_type == "source" and hasattr(logical, "voltage"):
+                params = {"voltage": logical.voltage}
 
             data["components"].append({
                 "id": group_id,
@@ -346,7 +375,7 @@ class Workspace():
                 "orientation": orientation,
                 "x": cx,
                 "y": cy,
-                "params": logical.__dict__  # si tu lógica es serializable
+                "params": params
             })
 
         for conn in self.connections:
@@ -360,6 +389,7 @@ class Workspace():
         return data
         
     def load_from_data(self, data):
+        """Carga componentes y conexiones guardadas."""
         self.canvas.delete("all")
 
         self.connections.clear()
@@ -367,33 +397,54 @@ class Workspace():
         self.component_ports.clear()
         self.component_map.clear()
 
-        # reconstruir componentes
+        # Mapeo para reasignar IDs de componentes del archivo a IDs generados
+        id_mapping = {}
+
+        # Reconstruir componentes
         for comp in data["components"]:
-            group_id = self.add_component(
+            original_id = comp["id"]
+            
+            # Crear el componente (add_component genera un nuevo UUID)
+            new_group_id = self.add_component(
                 x=comp["x"],
                 y=comp["y"],
                 orientation=comp["orientation"],
                 comp_type=comp["type"],
-                component_params=comp["params"]  # recrea la lógica igual
+                component_params=comp.get("params", {})
             )
+            
+            # Mapear el ID antiguo al nuevo
+            id_mapping[original_id] = new_group_id
 
-        # reconstruir conexiones
+        # Reconstruir conexiones usando el mapeo de IDs
         for conn in data["connections"]:
-            c1 = conn["c1"]
-            c2 = conn["c2"]
-            p1 = self.component_ports[c1][conn["p1_index"]]
-            p2 = self.component_ports[c2][conn["p2_index"]]
+            old_c1 = conn["c1"]
+            old_c2 = conn["c2"]
+            
+            # Usar el mapeo para obtener los nuevos IDs
+            new_c1 = id_mapping.get(old_c1)
+            new_c2 = id_mapping.get(old_c2)
+            
+            if new_c1 is None or new_c2 is None:
+                print(f"Advertencia: No se pudo mapear conexión {old_c1} -> {old_c2}")
+                continue
+            
+            try:
+                p1 = self.component_ports[new_c1][conn["p1_index"]]
+                p2 = self.component_ports[new_c2][conn["p2_index"]]
 
-            x1, y1 = self.get_port_center(p1)
-            x2, y2 = self.get_port_center(p2)
+                x1, y1 = self.get_port_center(p1)
+                x2, y2 = self.get_port_center(p2)
 
-            line = self.canvas.create_line(x1, y1, x2, y2, fill="black")
+                line = self.canvas.create_line(x1, y1, x2, y2, fill="black")
 
-            self.connections.append({
-                "p1": p1,
-                "p2": p2,
-                "line": line,
-                "c1": c1,
-                "c2": c2
-            })
+                self.connections.append({
+                    "p1": p1,
+                    "p2": p2,
+                    "line": line,
+                    "c1": new_c1,
+                    "c2": new_c2
+                })
+            except (KeyError, IndexError) as e:
+                print(f"Error al reconstruir conexión: {e}")
 
