@@ -52,7 +52,7 @@ tool_bar = Toolbar(root)          # Toolbar
 # Crear workspace lógico y pasarlo a la vista para sincronización
 logic_workspace = LogicWorkspace()
 workspace = GUIWorkspace(root, logic_workspace=logic_workspace)       # Main drawing/work area (GUI)
-statusbar = Statusbar(root)       # Bottom bar
+statusbar = Statusbar(root, )       # Bottom bar
 
 
 # ================================================================

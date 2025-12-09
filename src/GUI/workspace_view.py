@@ -2,6 +2,8 @@ import tkinter as tk
 import uuid
 import os
 from PIL import Image, ImageTk
+import copy
+import traceback
 
 class Workspace():
     def __init__(self, root, logic_workspace=None):
@@ -48,7 +50,20 @@ class Workspace():
         self.canvas.bind("<ButtonRelease-1>", self.on_release)
         self.root.bind("<Delete>", self.on_delete)
 
+        # Undo/Redo history (in-memory snapshots) and control flag to suppress during programmatic loads
+        self.undo_stack = []
+        self.redo_stack = []
+        self._suppress_history = False
+        self._max_history = 100
+        # Bind undo/redo shortcuts: Ctrl+Z -> undo, Ctrl+Y -> redo
+        self.root.bind_all("<Control-z>", self.undo)
+        self.root.bind_all("<Control-y>", self.redo)
+
     def add_component(self, x=50, y=50, orientation="horizontal", comp_type="source", component_params=None):
+        # record previous state so this addition can be undone
+        if not self._suppress_history:
+            self.push_undo()
+
         group_id = f"component_{uuid.uuid4().hex[:8]}"
 
         w, h = 60, 60
@@ -177,6 +192,10 @@ class Workspace():
                     self.connection_data = {"start_port": None, "line": None}
                     return
 
+                # record history before adding the new connection
+                if not self._suppress_history:
+                    self.push_undo()
+
                 sx, sy = self.get_port_center(start_port)
                 ex, ey = self.get_port_center(end_port)
                 self.canvas.coords(self.connection_data["line"], sx, sy, ex, ey)
@@ -206,6 +225,10 @@ class Workspace():
         if "body" in tags:
             group_tag = next((tag for tag in tags if tag.startswith("component_")), None)
             if group_tag:
+                # record state before potential move so it can be undone
+                if not self._suppress_history:
+                    self.push_undo()
+
                 self.drag_data["item"] = top_item
                 self.drag_data["current_group_tag"] = group_tag
                 self.drag_data["x"] = event.x
@@ -262,7 +285,10 @@ class Workspace():
             self.drag_data = {"item": None, "x": 0, "y": 0, "current_group_tag": None}
 
     def delete_component(self, group_tag):
-        
+        # record state before deletion so it can be undone
+        if not self._suppress_history:
+            self.push_undo()
+
         ports = self.component_ports.get(group_tag, [])
         to_remove = []
        
@@ -447,4 +473,61 @@ class Workspace():
                 })
             except (KeyError, IndexError) as e:
                 print(f"Error al reconstruir conexión: {e}")
+
+    # -------------------------
+    # Undo / Redo functionality
+    # -------------------------
+    def push_undo(self):
+        """Push a deep-copied snapshot of the current workspace to the undo stack and clear redo."""
+        try:
+            snap = self.serialize()
+            self.undo_stack.append(copy.deepcopy(snap))
+            if len(self.undo_stack) > self._max_history:
+                self.undo_stack.pop(0)
+            # New user action invalidates redo history
+            self.redo_stack.clear()
+        except Exception:
+            traceback.print_exc()
+
+    def undo(self, event=None):
+        """Undo: restore the last snapshot from undo_stack. Returns 'break' for Tk binding handlers."""
+        try:
+            if not self.undo_stack:
+                return "break"
+            # Save current state to redo stack
+            current = self.serialize()
+            self.redo_stack.append(copy.deepcopy(current))
+
+            snap = self.undo_stack.pop()
+
+            # Load snapshot without recording it to history
+            self._suppress_history = True
+            try:
+                self.load_from_data(snap)
+            finally:
+                self._suppress_history = False
+        except Exception:
+            traceback.print_exc()
+        return "break"
+
+    def redo(self, event=None):
+        """Redo: restore the last snapshot from redo_stack. Returns 'break' for Tk binding handlers."""
+        try:
+            if not self.redo_stack:
+                return "break"
+            # Save current state to undo stack
+            current = self.serialize()
+            self.undo_stack.append(copy.deepcopy(current))
+
+            snap = self.redo_stack.pop()
+
+            # Load snapshot without recording it to history
+            self._suppress_history = True
+            try:
+                self.load_from_data(snap)
+            finally:
+                self._suppress_history = False
+        except Exception:
+            traceback.print_exc()
+        return "break"
 

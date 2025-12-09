@@ -29,6 +29,31 @@ class Controller:
         if self.toolbar:
             self.toolbar.set_controller(self)
 
+        # Bind global undo/redo shortcuts to controller (calls workspace methods)
+        try:
+            self.root.bind_all("<Control-z>", lambda e: self.undo())
+            self.root.bind_all("<Control-y>", lambda e: self.redo())
+        except Exception:
+            pass
+    # ================================================================
+    # Undo / Redo wrappers (call Workspace methods)
+    # ================================================================
+    def undo(self):
+        """Call the GUI workspace undo handler."""
+        try:
+            if hasattr(self.gui_workspace, "undo"):
+                return self.gui_workspace.undo()
+        except Exception as e:
+            print(f"[Controller] undo failed: {e}")
+
+    def redo(self):
+        """Call the GUI workspace redo handler."""
+        try:
+            if hasattr(self.gui_workspace, "redo"):
+                return self.gui_workspace.redo()
+        except Exception as e:
+            print(f"[Controller] redo failed: {e}")
+
     # ================================================================
     # Event Dispatcher (Toolbar → Controller)
     # ================================================================
@@ -160,3 +185,22 @@ class Controller:
     def update(self):
         """Update simulation each frame."""
         self.simulator.step()  # Works only when simulator.running is True
+
+    # ================================================================
+    # Undo / Redo wrappers (call Workspace methods)
+    # ================================================================
+    def undo(self):
+        """Call the GUI workspace undo handler."""
+        try:
+            if hasattr(self.gui_workspace, "undo"):
+                return self.gui_workspace.undo()
+        except Exception as e:
+            print(f"[Controller] undo failed: {e}")
+
+    def redo(self):
+        """Call the GUI workspace redo handler."""
+        try:
+            if hasattr(self.gui_workspace, "redo"):
+                return self.gui_workspace.redo()
+        except Exception as e:
+            print(f"[Controller] redo failed: {e}")

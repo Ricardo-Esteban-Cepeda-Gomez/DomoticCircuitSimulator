@@ -1,5 +1,3 @@
-# Workshop No. 3 — Applying SOLID Principles to a Domotic Circuit Simulator
-
 ### Universidad Nacional de Colombia  
 **Object-Oriented Programming — Eng. Carlos Andrés Sierra Virgüez**  
 **Authors:** Ricardo Esteban Cepeda Gómez, Johan Sebastian Liévano García, Sebastián Vanegas Ariza  
@@ -7,101 +5,178 @@
 
 ---
 
-## 📘 Overview
+## User Guide — How to Use the System
 
-This workshop focused on refactoring and extending a **Domotic Circuit Simulator** using the **SOLID principles** of object-oriented design.  
-The goal was to improve modularity, organization, extensibility, and maintainability while preserving the existing functionality of the simulator.
+### 🚀 Purpose
 
-The project includes components such as sensors, actuators, power sources, a workspace UI, a simulator engine, and file management utilities.
-
----
-
-## 🧩 SOLID Principles Applied
-
-### **S — Single Responsibility Principle (SRP)**
-Each class now has only one responsibility.  
-In the simulator this meant separating **simulation logic** from **visual representation**, preventing classes from handling unrelated concerns like rendering, saving, or UI interaction.
+This guide teaches users how to build circuits, connect components, and run simulations inside the system.
 
 ---
 
-### **O — Open/Closed Principle (OCP)**
-Classes are open for extension but closed for modification.  
-The simulator allows adding new components (e.g., new sensors or actuators) **without altering existing code**, thanks to abstract base classes and clear inheritance structures.
+## 🖥 Program Interface
+
+On startup, the user sees:
+
+- *Menubar* — software options.
+- *Toolbar* — list of available circuit components.
+- *Workspace* — area where projects are built.
+- *Statusbar* — system execution status.
 
 ---
 
-### **L — Liskov Substitution Principle (LSP)**
-Subclasses must be replaceable by their base class.  
-For example, different types of power sources (AC/DC) behave consistently when substituted, safely providing voltage and current through shared interfaces.
+## 🛠 Creating a Circuit
+
+### 1. Adding components
+
+1. Open the *Toolbar*.
+2. Choose a component (LED, resistor, switch, etc.).
+3. Click inside the *Workspace* to place it.
+
+You may add as many elements as needed.
 
 ---
 
-### **I — Interface Segregation Principle (ISP)**
-Classes depend only on the methods they actually need.  
-Component functionality was divided so that no class is forced to implement unrelated behavior.  
-Every component follows focused interfaces with clear responsibilities.
+### 2. Wiring components
+
+1. Select *Cable/Wire tool*.
+2. Click the output pin of a component.
+3. Click the input pin of another component.
+
+A *Source* is required for circuit power.
 
 ---
 
-### **D — Dependency Inversion Principle (DIP)**
-High-level modules depend on **abstractions**, not concrete implementations.  
-The simulator engine interacts with components, the workspace, and UI modules through abstract definitions, making the architecture flexible and reusable.
+### 3. Running the simulation
+
+1. Click *Run/Start* on the *Statusbar*.
+2. Observe component reactions:
+   - LED turns ON
+   - Alarm activates
+   - Capacitor charges/discharges
+   - Probe measures values
+
+To modify or stop → press *Pause*.
 
 ---
 
-## 🗂️ Updated UML and CRC Cards
+### 4. Saving and loading projects
 
-The project includes updated diagrams and role cards for:
-
-- **Components** — store type, state, and handle simulation behavior and rendering  
-- **Workspace** — manages all components, positions, user actions, and connections  
-- **Simulator** — runs/pause simulation and updates visual feedback  
-- **FileManager** — save/load project files (`.bsm`) and workspace data  
-- **Toolbar** — tool selection and component creation interface  
-- **StatusBar** — displays messages and simulation state  
-- Additional component types such as:
-  - Alarm  
-  - Resistor  
-  - LED  
-  - Motor  
-  - Sensor  
-  - Transistor  
-  - Source  
-  - Probe  
-  - Screen  
-  - Switch  
+Menubar → File → Save / Load  
+The entire circuit is serialized using pickle.
 
 ---
 
-## 🧪 Python Code Snippets
+### 5. Quick Examples
 
-The workshop includes modular code implementations for each major element of the simulator:
-
-- `Component` (abstract base class)  
-- Electrical components (LED, Motor, Resistor, Transistor, Switch, Sensor…)  
-- `Source` (power source)  
-- `Simulator` (logic engine)  
-- `Workspace` (manages connections and drawing)  
-- `FileManager`  
-- `StatusBar`  
-- `Toolbar`  
-
-These classes apply SOLID principles through inheritance, composition, and clear abstractions.
+| Goal | Basic Setup |
+|---|---|
+| Turn on a LED | Source → Switch → LED (connected with wires) → Run |
+| Trigger alarm | Source → Switch → Alarm → Run |
+| Measure current | Place Probe in circuit path |
 
 ---
 
-## 📝 Reflection
+# Technical Documentation — Internal System Functionality
 
-Applying SOLID principles proved challenging but extremely valuable.  
-Initially, multiple classes performed unrelated tasks, making the system rigid and difficult to scale.  
-Through refactoring and abstraction:
+## 1. Technical Documentation — Internal System Functionality
 
-- Code became cleaner and easier to understand  
-- New components could be added without modifying existing classes  
-- Dependencies were reduced and reused more effectively  
-- We learned how essential software design is, beyond simply writing functional code  
+### 📌 Introduction
+This system is a platform designed to build and simulate home automation electrical circuits through a graphical user interface.  
+It allows users to place electronic components, connect them using wires, and run simulations to observe how the circuit behaves in real time.  
+The project is developed using OOP with SOLID principles, ensuring scalability, maintainability, and clean architecture.
 
-The workshop strengthened our understanding of creating **sustainable**, **scalable**, and **maintainable** object-oriented systems.
+---
+
+## 🏗 General Architecture
+
+### � Graphical User Interface (GUI)
+
+The GUI is the main interaction layer for the user. It consists of:
+
+| GUI Component | Description |
+|---|---|
+| *Menubar* | Top bar containing menu options such as file, view, tools, help, etc. |
+| *Toolbar* | Panel with icons to add components into the circuit. |
+| *Workspace* | Main area where circuit components are placed and arranged. |
+| *Statusbar* | Displays the system state: Running/Paused, alerts, messages. |
+
+---
+
+### 🔌 Circuit Components
+
+The system includes different electrical elements, all inheriting from a base class Component.  
+Each component has individual behavior and can interact with others through connections.
+
+Available components:
+
+- Alarm  
+- Capacitor  
+- LED  
+- Probe  
+- Resistor  
+- Source (power supply)  
+- Switch  
+- Cables (connection links)
+
+Examples of behaviors:
+
+- *LED* lights up when receiving current.
+- *Switch* opens or closes the circuit path.
+- *Resistor* limits current flow.
+- *Probe* allows data reading inside the circuit.
+- *Capacitor* stores and releases energy with time.
+
+---
+
+### 🧠 Controller
+
+The *Controller* manages system functionality and logic flow.  
+It acts as the bridge between GUI components and internal logic.
+
+Responsibilities:
+
+- Handle user actions and component creation.
+- Manage and store circuit elements within the workspace.
+- Communicate changes between visual and logical layers.
+- Control simulation events and updates.
+
+---
+
+### 🌀 Simulator
+
+The *Simulator* processes circuit logic and evaluates electrical behavior.
+
+Main functions:
+
+- Iterate through circuit components and propagate energy.
+- Update each component state based on input/output.
+- Refresh the GUI according to events (like LED ON, alarm active).
+- Operates in execution cycles controlled by the Statusbar.
+
+---
+
+### 💾 File Manager (Pickle)
+
+The system uses Python pickle to save and load projects.  
+This allows preserving:
+
+- All components placed on the workspace
+- Their properties and configuration
+- Cable connections and links
+
+Users can stop and resume projects at any time.
+
+---
+
+## 🔄 Internal Workflow
+
+1. The user places components from *Toolbar → Workspace*.
+2. The *Controller* registers the component inside the system.
+3. *Cables* are used to connect outputs to inputs.
+4. User starts simulation — *Simulator* activates.
+5. Circuit logic is processed and electricity flows.
+6. *Statusbar* updates state changes (Running/Paused).
+7. Project can be saved or loaded using *File Manager*.
 
 ---
 
@@ -112,11 +187,21 @@ https://github.com/Ricardo-Esteban-Cepeda-Gomez/DomoticCircuitSimulator
 
 ---
 
-## 📚 Contents
+## Recommended Improvements
 
-- Workshop No. 3 — Applying SOLID Principles to a Domotic Circuit Simulator  
-- SOLID Principles Analysis  
-- Updated UML and CRC Cards  
-- Python Code Snippets  
-- Reflection  
-- Submission Format  
+- Add UML diagrams and interaction flow charts.
+- Create a styled PDF version with images.
+- Expand component documentation with input/output specification.
+- Generate automated README for GitHub.
+
+---
+
+## Team / Credits
+
+- Authors: Ricardo Esteban Cepeda Gómez, Johan Sebastian Liévano García, Sebastián Vanegas Ariza
+- Professor: Eng. Carlos Andrés Sierra Virgüez
+- Universidad: Universidad Nacional de Colombia
+
+---
+
+*End of file*

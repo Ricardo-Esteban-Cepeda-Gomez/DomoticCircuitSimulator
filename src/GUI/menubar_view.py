@@ -282,6 +282,10 @@ class Menubar:
     def main(self, text):
         if text == "Save (Ctrl+S)":
             self.controller.save_workspace()
-        if text == "Open (Ctrl+O)":
+        elif text == "Open (Ctrl+O)":
             self.controller.load_workspace()
+        elif text == "Undo (Ctrl+Z)":
+            self.controller.undo()
+        elif text == "Redo (Ctrl+Y)":
+            self.controller.redo()
 

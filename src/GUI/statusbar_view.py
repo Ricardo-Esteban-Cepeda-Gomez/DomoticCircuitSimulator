@@ -1,7 +1,7 @@
 import customtkinter as ctk
 
 class Statusbar:
-    def __init__(self, root, simulator: Simulator = None):
+    def __init__(self, root, simulator=None):
         self.root = root
         self.simulator = simulator
         self.current_message = "Ready"
