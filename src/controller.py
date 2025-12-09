@@ -1,5 +1,6 @@
 # controller.py
 from logic.simulator import Simulator
+from logic.file_manager import FileManager
 
 
 class Controller:
@@ -15,6 +16,7 @@ class Controller:
         self.toolbar = toolbar
         self.menubar = menubar
         self.statusbar = statusbar
+        self.file_manager = FileManager()
 
         # Logic references
         self.logic_workspace = logic_workspace
@@ -115,6 +117,14 @@ class Controller:
         except Exception as e:
             print(f"[Controller] Error creating component {comp_type}: {e}")
 
+    # ================================================================
+    # FileManager Logic
+    # ================================================================
+
+    def save_workspace(self):
+        self.file_manager.save(self.gui_workspace)
+    def load_workspace(self):
+        self.gui_workspace = self.file_manager.load()
     # ================================================================
     # Simulation API
     # ================================================================
