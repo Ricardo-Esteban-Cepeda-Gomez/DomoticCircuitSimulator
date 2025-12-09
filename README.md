@@ -1,198 +1,102 @@
+# Domotic Circuit Simulator — BeeSmart
+
 ### Universidad Nacional de Colombia  
 **Object-Oriented Programming — Eng. Carlos Andrés Sierra Virgüez**  
 **Authors:** Ricardo Esteban Cepeda Gómez, Johan Sebastian Liévano García, Sebastián Vanegas Ariza  
-**Date:** November 25, 2025
+**Date:** December 09, 2025
 
 ---
 
-## User Guide — How to Use the System
+## User Guide — Quick start
 
-### 🚀 Purpose
+This section gives a concise, app-oriented walkthrough so a new user can open the app and build a working circuit in minutes.
 
-This guide teaches users how to build circuits, connect components, and run simulations inside the system.
+Requirements
+- Python 3.10 or newer
+- Recommended: a virtual environment
 
----
+Install dependencies (from project root):
 
-## 🖥 Program Interface
+```bash
+python -m pip install -r requirements.txt
+```
 
-On startup, the user sees:
+Run the app:
 
-- *Menubar* — software options.
-- *Toolbar* — list of available circuit components.
-- *Workspace* — area where projects are built.
-- *Statusbar* — system execution status.
+```bash
+python src/main.py
+```
 
----
+Main window layout
+- Menubar: File / Edit / Help and quick access to Save/Open/Undo/Redo actions
+- Toolbar: drag or click component icons to add them to the workspace
+- Workspace: central canvas where you place components, draw wires and move items
+- Statusbar: shows simulation state and quick messages
 
-## 🛠 Creating a Circuit
+Keyboard shortcuts
+- Ctrl+S — Save project
+- Ctrl+O — Open project
+- Ctrl+Z — Undo
+- Ctrl+Y — Redo
+- Delete — Delete selected component
 
-### 1. Adding components
-
-1. Open the *Toolbar*.
-2. Choose a component (LED, resistor, switch, etc.).
-3. Click inside the *Workspace* to place it.
-
-You may add as many elements as needed.
-
----
-
-### 2. Wiring components
-
-1. Select *Cable/Wire tool*.
-2. Click the output pin of a component.
-3. Click the input pin of another component.
-
-A *Source* is required for circuit power.
+File format
+- Workspaces are saved as binary workspace files (default extension `.wrk`). The File Manager uses Python `pickle` to serialize the workspace dictionary.
 
 ---
 
-### 3. Running the simulation
+## Practical Usage Example
 
-1. Click *Run/Start* on the *Statusbar*.
-2. Observe component reactions:
-   - LED turns ON
-   - Alarm activates
-   - Capacitor charges/discharges
-   - Probe measures values
-
-To modify or stop → press *Pause*.
+1. Start the app (`python src/main.py`).
+2. From the toolbar add a `Source` (battery), `Switch`, and an `LED`.
+3. Click on component ports to draw a wire connecting Source → Switch → LED.
+4. Click Start in the statusbar to run the simulation and observe the LED lighting up when the switch is closed.
+5. Use File → Save to store the workspace; the filename appears in the window title.
 
 ---
 
-### 4. Saving and loading projects
+## Features (what this app does)
 
-Menubar → File → Save / Load  
-The entire circuit is serialized using pickle.
-
----
-
-### 5. Quick Examples
-
-| Goal | Basic Setup |
-|---|---|
-| Turn on a LED | Source → Switch → LED (connected with wires) → Run |
-| Trigger alarm | Source → Switch → Alarm → Run |
-| Measure current | Place Probe in circuit path |
+- Visual circuit building with drag & drop components
+- Connect components via clickable port wiring
+- Basic simulation loop: components update each frame
+- Save / Load workspace files
+- Undo / Redo support (Ctrl+Z / Ctrl+Y)
+- Simple component set: Source, Resistor, LED, Switch, Capacitor, Alarm, Probe
 
 ---
 
-# Technical Documentation — Internal System Functionality
+## Developer Notes (project structure)
 
-## 1. Technical Documentation — Internal System Functionality
+Top-level source layout (inside `src/`):
 
-### 📌 Introduction
-This system is a platform designed to build and simulate home automation electrical circuits through a graphical user interface.  
-It allows users to place electronic components, connect them using wires, and run simulations to observe how the circuit behaves in real time.  
-The project is developed using OOP with SOLID principles, ensuring scalability, maintainability, and clean architecture.
+- `GUI/` — Tkinter / customtkinter views (menubar, toolbar, workspace, statusbar)
+- `logic/` — core simulation, components, file manager and workspace logic
+- `controller.py` — application controller glue between GUI and logic
+- `main.py` — application entry point
 
----
+File highlights
+- `logic/file_manager.py` — handles saving/loading workspaces (.wrk)
+- `src/GUI/workspace_view.py` — canvas rendering, user interactions, undo/redo support
+- `logic/components/` — component implementations (LED, Alarm, Resistor, etc.)
 
-## 🏗 General Architecture
-
-### � Graphical User Interface (GUI)
-
-The GUI is the main interaction layer for the user. It consists of:
-
-| GUI Component | Description |
-|---|---|
-| *Menubar* | Top bar containing menu options such as file, view, tools, help, etc. |
-| *Toolbar* | Panel with icons to add components into the circuit. |
-| *Workspace* | Main area where circuit components are placed and arranged. |
-| *Statusbar* | Displays the system state: Running/Paused, alerts, messages. |
+Development tips
+- The workspace keeps a serializable dict via `serialize()` and `load_from_data()` to restore state.
+- Undo/Redo uses in-memory snapshots of `serialize()`; adjust `push_undo()` calls in `workspace_view.py` if you want different granularity.
 
 ---
 
-### 🔌 Circuit Components
+## Troubleshooting & Known limitations
 
-The system includes different electrical elements, all inheriting from a base class Component.  
-Each component has individual behavior and can interact with others through connections.
-
-Available components:
-
-- Alarm  
-- Capacitor  
-- LED  
-- Probe  
-- Resistor  
-- Source (power supply)  
-- Switch  
-- Cables (connection links)
-
-Examples of behaviors:
-
-- *LED* lights up when receiving current.
-- *Switch* opens or closes the circuit path.
-- *Resistor* limits current flow.
-- *Probe* allows data reading inside the circuit.
-- *Capacitor* stores and releases energy with time.
+- Audio for the Alarm component requires `simpleaudio` (optional). If not installed the app will log a message instead of playing sound.
+- Saved files use `pickle` — do not open .wrk files from untrusted sources.
+- Some UI polish and advanced component parameter editing are work-in-progress.
 
 ---
 
-### 🧠 Controller
+## Contributing
 
-The *Controller* manages system functionality and logic flow.  
-It acts as the bridge between GUI components and internal logic.
-
-Responsibilities:
-
-- Handle user actions and component creation.
-- Manage and store circuit elements within the workspace.
-- Communicate changes between visual and logical layers.
-- Control simulation events and updates.
-
----
-
-### 🌀 Simulator
-
-The *Simulator* processes circuit logic and evaluates electrical behavior.
-
-Main functions:
-
-- Iterate through circuit components and propagate energy.
-- Update each component state based on input/output.
-- Refresh the GUI according to events (like LED ON, alarm active).
-- Operates in execution cycles controlled by the Statusbar.
-
----
-
-### 💾 File Manager (Pickle)
-
-The system uses Python pickle to save and load projects.  
-This allows preserving:
-
-- All components placed on the workspace
-- Their properties and configuration
-- Cable connections and links
-
-Users can stop and resume projects at any time.
-
----
-
-## 🔄 Internal Workflow
-
-1. The user places components from *Toolbar → Workspace*.
-2. The *Controller* registers the component inside the system.
-3. *Cables* are used to connect outputs to inputs.
-4. User starts simulation — *Simulator* activates.
-5. Circuit logic is processed and electricity flows.
-6. *Statusbar* updates state changes (Running/Paused).
-7. Project can be saved or loaded using *File Manager*.
-
----
-
-## 🔗 Repository
-
-GitHub Repository:  
-https://github.com/Ricardo-Esteban-Cepeda-Gomez/DomoticCircuitSimulator
-
----
-
-## Recommended Improvements
-
-- Add UML diagrams and interaction flow charts.
-- Create a styled PDF version with images.
-- Expand component documentation with input/output specification.
-- Generate automated README for GitHub.
+Contributions are welcome. Please open issues or PRs on the GitHub repository. Keep changes small and add tests where appropriate.
 
 ---
 
