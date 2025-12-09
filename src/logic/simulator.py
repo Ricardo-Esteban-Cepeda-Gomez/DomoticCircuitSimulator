@@ -14,7 +14,7 @@ class Simulator:
         self.time = 0.0
         self.dt_default = dt_default
 
-        self.running = False
+        self.running = True
 
         self.logger = logging.getLogger(__name__)
 

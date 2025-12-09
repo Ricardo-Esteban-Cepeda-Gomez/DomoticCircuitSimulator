@@ -1,5 +1,4 @@
 import customtkinter as ctk
-from simulator import Simulator   
 
 class Statusbar:
     def __init__(self, root, simulator: Simulator = None):
@@ -33,6 +32,9 @@ class Statusbar:
         if not self.simulator:
             return  
 
-        state = "Paused" if self.simulator.is_paused else "Running"
+        state = "Paused" if self.simulator.running else "Running"
         self.current_message = state
-        self.label.configure(text=f"Sim Status: {state}")  
+        self.label.configure(text=f"Sim Status: {state}")
+
+    def set_simulator(self, simulator):
+        self.simulator = simulator

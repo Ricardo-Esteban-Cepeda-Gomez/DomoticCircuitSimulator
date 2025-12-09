@@ -23,6 +23,8 @@ class Controller:
         self.logic_workspace = logic_workspace
         self.simulator = Simulator(self.logic_workspace)
 
+        self.statusbar.set_simulator(self.simulator)
+
         # Bind modern toolbar event API
         if self.toolbar:
             self.toolbar.set_controller(self)
@@ -38,10 +40,14 @@ class Controller:
         print(f"[Controller] action='{action_component}', data={data}")
         # --- Simulation actions ----------------------------------------
         if action_component == "play":
+            self.statusbar.update_status()
             return self.start_simulation()
 
+
         if action_component == "pause":
+            self.statusbar.update_status()
             return self.stop_simulation()
+            
 
         # --- Component creation actions --------------------------------
         # Normalize rotation suffix
