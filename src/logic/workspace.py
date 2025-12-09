@@ -1,11 +1,11 @@
-from components.component import Component
-from components.source import Source
-from components.resistor import Resistor
-from components.switch import Switch
-from components.capacitor import Capacitor
-from components.led import Led
-from components.alarm import Alarm
-from components.probes import Probes
+from logic.components.component import Component
+from logic.components.source import Source
+from logic.components.resistor import Resistor
+from logic.components.switch import Switch
+from logic.components.capacitor import Capacitor
+from logic.components.led import Led
+from logic.components.alarm import Alarm
+from logic.components.probes import Probes
 
 class Workspace:
     def __init__(self, name=""):
@@ -32,10 +32,10 @@ class Workspace:
         if ComponentClass is None:
             raise ValueError(f"Tipo de componente no válido: {comp_type}")
         
-     
+
         component = ComponentClass(**kwargs)
         
-       
+
         self.add_component(component)
         
         return component

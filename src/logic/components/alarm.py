@@ -1,4 +1,4 @@
-from component import Component
+from logic.components.component import Component
 import time
 
 class Alarm(Component):

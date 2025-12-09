@@ -1,4 +1,4 @@
-from component import Component
+from logic.components.component import Component
 
 class Switch(Component):
     def __init__(self, label: str = "Switch"):

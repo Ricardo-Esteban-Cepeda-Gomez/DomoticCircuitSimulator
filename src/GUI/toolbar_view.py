@@ -841,58 +841,43 @@ class Toolbar:
     # ==========================================================
         self.alarm_frame = ctk.CTkFrame(self.frame, fg_color="transparent")
 
-        self.alarm_checkbox_frame= ctk.CTkFrame(self.alarm_frame,
-                                                width=100,
-                                                fg_color="#b1b2b5",
-                                                border_color="black",
-                                                border_width=1,
-                                                corner_radius=5)
-        self.alarm_checkbox_frame.pack(side="left")
+        # --- Frequency Frame ---
+        self.alarm_checkbox_frame = ctk.CTkFrame(
+            self.alarm_frame,
+            width=120,
+            fg_color="#b1b2b5",
+            border_color="black",
+            border_width=1,
+            corner_radius=5
+        )
+        self.alarm_checkbox_frame.pack(side="left", padx=5)
 
-        self.dc_ac=True
+        # Label
+        self.frequency_label = ctk.CTkLabel(
+            self.alarm_checkbox_frame,
+            text="Freq (Hz):",
+            text_color="black",
+            font=(None, 16)
+        )
+        self.frequency_label.pack(pady=2)
 
-        def alarm_dc_checkbox_event():
-            self.alarm_ac_checkbox.deselect()
-            self.dc_ac=True
-        
-        check_var_dc = ctk.BooleanVar(value=True)
-        self.alarm_dc_checkbox = ctk.CTkCheckBox(self.alarm_checkbox_frame, 
-                                                text='DC', 
-                                                command=alarm_dc_checkbox_event,
-                                                width=40, 
-                                                height=20, 
-                                                checkbox_width=15, 
-                                                checkbox_height=15,
-                                                variable=check_var_dc, 
-                                                onvalue=True, 
-                                                offvalue=False,
-                                                border_width=1,
-                                                border_color="black",
-                                                text_color="black",
-                                                font=(None, 20))
-        self.alarm_dc_checkbox.pack(side="top", pady=1)
+        # Entry for frequency
+        self.frequency_entry = ctk.CTkEntry(
+            self.alarm_checkbox_frame,
+            width=80,
+            height=32,
+            justify="center",
+            fg_color="white",
+            text_color="black",
+            border_color="black",
+            border_width=1,
+            placeholder_text="440"
+        )
+        self.frequency_entry.pack(pady=5)
 
-        def alarm_ac_checkbox_event():
-            self.alarm_dc_checkbox.deselect()
-            self.dc_ac=False
+        # Store default frequency
+        self.frequency_entry.insert(0, "440")
 
-        
-        check_var_ac = ctk.BooleanVar(value=False)
-        self.alarm_ac_checkbox = ctk.CTkCheckBox(self.alarm_checkbox_frame, 
-                                                text='AC', 
-                                                command=alarm_ac_checkbox_event,
-                                                width=40, 
-                                                height=20, 
-                                                checkbox_width=15, 
-                                                checkbox_height=15,
-                                                variable=check_var_ac, 
-                                                onvalue=True, 
-                                                offvalue=False,
-                                                border_width=1,
-                                                border_color="black",
-                                                text_color="black",
-                                                font=(None, 20))
-        self.alarm_ac_checkbox.pack(side="top", pady=1)
 
 
 
@@ -1199,6 +1184,7 @@ class Toolbar:
 
     def main(self, button_name: str, parameter1, parameter2):
         print(f"{button_name} pressed with parameter1: {parameter1} and parameter2: {parameter2}")
+        self.controller.on_toolbar_action(button_name, parameter1, parameter2)
 
 class Tooltip:
     def __init__(self, widget, text, delay=300, fade_duration=200):
