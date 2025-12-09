@@ -9,5 +9,7 @@ class Statusbar:
         self.current_message = message
         print("Status:", message)
 
-    def update(self, state: str):
-        print("Status updated to:", state)
+    def update(self):
+        state = "Paused" if self.simulator.is_paused else "Running"
+        self.current_message = state
+        print("Status:", state)
