@@ -26,7 +26,7 @@ PNG_PATH = os.path.join(IMG_DIR, "bee.png")
 # Main Window
 # ------------------------
 root = ctk.CTk()
-root.title("BeeSmart")
+root.title("BeeSmart - UnsavedFile")
 root.geometry("1200x700")
 
 
@@ -61,6 +61,7 @@ statusbar = Statusbar(root)       # Bottom bar
 
 # Controller receives the workspace and toolbar directly
 controller = Controller(
+    root = root,
     gui_workspace=workspace,
     logic_workspace=logic_workspace,
     toolbar=tool_bar,

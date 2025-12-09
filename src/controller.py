@@ -10,13 +10,14 @@ class Controller:
     and updates both GUI and logic workspaces.
     """
 
-    def __init__(self, gui_workspace, logic_workspace, toolbar=None, menubar=None, statusbar=None):
+    def __init__(self,root, gui_workspace, logic_workspace, toolbar=None, menubar=None, statusbar=None):
         # UI references
+        self.root = root
         self.gui_workspace = gui_workspace
         self.toolbar = toolbar
         self.menubar = menubar
         self.statusbar = statusbar
-        self.file_manager = FileManager()
+        self.file_manager = FileManager(self.root)
 
         # Logic references
         self.logic_workspace = logic_workspace
