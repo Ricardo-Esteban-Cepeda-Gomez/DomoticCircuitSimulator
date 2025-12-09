@@ -861,6 +861,22 @@ class Toolbar:
         )
         self.frequency_label.pack(pady=2)
 
+        # Frequency storage and parsed value
+        self.frequency_var = ctk.StringVar(value="440")
+        self.frequency_value = 440.0
+
+        def recalc_value_alarm(*args):
+            value_str = self.frequency_var.get()
+            try:
+                parsed = float(value_str)
+            except ValueError:
+                Tooltip(self.alarm_checkbox_frame, "enter a valid value").show_tooltip()
+                return
+            if parsed <= 0:
+                return
+            self.frequency_value = parsed
+            print("Alarm final value:", self.frequency_value)
+
         # Entry for frequency
         self.frequency_entry = ctk.CTkEntry(
             self.alarm_checkbox_frame,
@@ -871,12 +887,13 @@ class Toolbar:
             text_color="black",
             border_color="black",
             border_width=1,
-            placeholder_text="440"
+            placeholder_text="440",
+            textvariable=self.frequency_var
         )
         self.frequency_entry.pack(pady=5)
 
-        # Store default frequency
-        self.frequency_entry.insert(0, "440")
+        # Ensure initial parsed value and trace updates
+        self.frequency_var.trace_add("write", recalc_value_alarm)
 
 
 
@@ -898,7 +915,8 @@ class Toolbar:
             border_color="black",
             border_width=1,
             corner_radius=5,
-            command= lambda: self.main("Alarm", self.dc_ac, 0)
+            # pass the parsed numeric frequency value instead of the StringVar object
+            command= lambda: self.main("Alarm", self.frequency_value, 0)
             )
         self.Alarm_button_create.pack(side="left", padx=5)
 
@@ -916,7 +934,8 @@ class Toolbar:
             border_color="black",
             border_width=1,
             corner_radius=5,
-            command= lambda: self.main("Alarm_rotate", self.dc_ac, 0)
+            # pass numeric frequency for rotated creation as well
+            command= lambda: self.main("Alarm_rotate", self.frequency_value, 0)
             )
         self.Alarm_button_create_rotate.pack(side="left", padx=5)
 

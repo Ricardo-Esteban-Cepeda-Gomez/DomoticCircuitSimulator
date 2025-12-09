@@ -389,7 +389,12 @@ class Workspace():
             elif comp_type == "capacitor" and hasattr(logical, "capacitance"):
                 params = {"capacitance": logical.capacitance}
             elif comp_type == "alarm" and hasattr(logical, "frequency"):
-                params = {"frequency": logical.frequency}
+                # Include volume and on/off state so undo/redo and loads restore audible state
+                params = {
+                    "frequency": logical.frequency,
+                    **({"volume": logical.volume} if hasattr(logical, "volume") else {}),
+                    **({"is_on": logical.is_on} if hasattr(logical, "is_on") else {})
+                }
             elif comp_type == "probe" and hasattr(logical, "mode"):
                 params = {"mode": logical.mode}
             elif comp_type == "source" and hasattr(logical, "voltage"):
@@ -431,16 +436,37 @@ class Workspace():
             original_id = comp["id"]
             
             # Crear el componente (add_component genera un nuevo UUID)
+            comp_params = comp.get("params", {}) or {}
+            # remove runtime-only params (like is_on) before passing to constructor
+            ctor_params = {k: v for k, v in comp_params.items() if k != "is_on"}
             new_group_id = self.add_component(
                 x=comp["x"],
                 y=comp["y"],
                 orientation=comp["orientation"],
                 comp_type=comp["type"],
-                component_params=comp.get("params", {})
+                component_params=ctor_params
             )
             
             # Mapear el ID antiguo al nuevo
             id_mapping[original_id] = new_group_id
+            # After creation, restore any runtime-only state (e.g., alarm on/off)
+            try:
+                params = comp.get("params", {}) or {}
+                logical = self.component_map.get(new_group_id)
+                if logical is not None:
+                    # set numeric params explicitly in case constructor didn't handle them
+                    if "frequency" in params and hasattr(logical, "frequency"):
+                        logical.frequency = params["frequency"]
+                    if "volume" in params and hasattr(logical, "volume"):
+                        logical.volume = params["volume"]
+                    # Restore alarm active state by invoking its API
+                    if params.get("is_on") and hasattr(logical, "turn_on"):
+                        try:
+                            logical.turn_on()
+                        except Exception:
+                            pass
+            except Exception:
+                pass
 
         # Reconstruir conexiones usando el mapeo de IDs
         for conn in data["connections"]:

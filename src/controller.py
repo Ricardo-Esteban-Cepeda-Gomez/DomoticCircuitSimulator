@@ -33,6 +33,8 @@ class Controller:
         try:
             self.root.bind_all("<Control-z>", lambda e: self.undo())
             self.root.bind_all("<Control-y>", lambda e: self.redo())
+            self.root.bind_all("<Control-o>", lambda e: self.load_workspace())
+            self.root.bind_all("<Control-s>", lambda e: self.save_workspace())
         except Exception:
             pass
     # ================================================================

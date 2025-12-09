@@ -4,7 +4,7 @@ class Statusbar:
     def __init__(self, root, simulator=None):
         self.root = root
         self.simulator = simulator
-        self.current_message = "Ready"
+        self.current_message = "Sim Status: Running"
 
 
         self.frame = ctk.CTkFrame(
@@ -13,13 +13,19 @@ class Statusbar:
             height=50, 
             corner_radius=0, 
             border_color="#000000", 
-            border_width=2
+            border_width=1
         )
         self.frame.pack(side="bottom", fill="x")
         self.frame.pack_propagate(False)
 
+        self.frame_help = ctk.CTkFrame(self.frame, fg_color="transparent")
+        self.frame_help.pack(side="left", padx=10)
+        
 
-        self.label = ctk.CTkLabel(self.frame, text="Ready", text_color="#000000")
+        self.frame_state = ctk.CTkFrame(self.frame, fg_color="transparent")
+        self.frame_state.pack(side="right", padx=10)
+
+        self.label = ctk.CTkLabel(self.frame_state, text="Sim Status: Running", text_color="#000000")
         self.label.pack(side="left", padx=10)
 
 
