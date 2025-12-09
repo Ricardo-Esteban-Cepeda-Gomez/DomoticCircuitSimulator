@@ -6,7 +6,8 @@ from PIL import Image
 
 from GUI.menubar_view import Menubar
 from GUI.toolbar_view import Toolbar
-from GUI.workspace_view import Workspace
+from GUI.workspace_view import Workspace as GUIWorkspace
+from logic.workspace import Workspace as LogicWorkspace
 from GUI.statusbar_view import Statusbar
 from controller import Controller
 
@@ -48,7 +49,9 @@ else:
 
 menu_bar = Menubar(root)          # Top menu bar
 tool_bar = Toolbar(root)          # Toolbar
-workspace = Workspace(root)       # Main drawing/work area
+# Crear workspace lógico y pasarlo a la vista para sincronización
+logic_workspace = LogicWorkspace()
+workspace = GUIWorkspace(root, logic_workspace=logic_workspace)       # Main drawing/work area (GUI)
 statusbar = Statusbar(root)       # Bottom bar
 
 
@@ -58,7 +61,8 @@ statusbar = Statusbar(root)       # Bottom bar
 
 # Controller receives the workspace and toolbar directly
 controller = Controller(
-    workspace=workspace,
+    gui_workspace=workspace,
+    logic_workspace=logic_workspace,
     toolbar=tool_bar,
     menubar=menu_bar,
     statusbar=statusbar
