@@ -280,6 +280,8 @@ class Menubar:
             self.open_menu.place_forget()
             self.open_menu = None
     def main(self, text):
-        if text == "New (Ctrl+N)":
-            self.controller.save_workspace
+        if text == "Save (Ctrl+S)":
+            self.controller.save_workspace()
+        if text == "Open (Ctrl+O)":
+            self.controller.load_workspace()
 

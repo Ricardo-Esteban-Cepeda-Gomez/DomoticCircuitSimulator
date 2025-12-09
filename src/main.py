@@ -70,6 +70,7 @@ controller = Controller(
 
 # Toolbar connects back to controller (for event dispatch)
 tool_bar.set_controller(controller)
+menu_bar.set_controller(controller)
 
 # Menubar can also receive controller if needed
 # menu_bar.set_controller(controller)

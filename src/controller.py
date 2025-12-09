@@ -122,9 +122,16 @@ class Controller:
     # ================================================================
 
     def save_workspace(self):
-        self.file_manager.save(self.gui_workspace)
+        data = self.gui_workspace.serialize()
+        self.file_manager.save(data)
     def load_workspace(self):
-        self.gui_workspace = self.file_manager.load()
+        data = self.file_manager.load()
+        if data is None:
+            return
+
+        self.gui_workspace.load_from_data(data)
+
+
     # ================================================================
     # Simulation API
     # ================================================================

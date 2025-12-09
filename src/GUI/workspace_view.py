@@ -322,14 +322,78 @@ class Workspace():
       
         self.canvas.delete(group_tag)
 
+    def serialize(self):
+        data = {
+            "components": [],
+            "connections": []
+        }
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    ws = Workspace(root)
-    ws.add_component(100, 100, "horizontal", "source")
-    ws.add_component(250, 150, "vertical", "resistor")
-    ws.add_component(400, 200, "horizontal", "led")
-    ws.add_component(550, 250, "vertical", "alarm")
-    ws.add_component(700, 300, "horizontal", "probe")  
-    root.mainloop()
+        for group_id, logical in self.component_map.items():
+            bbox = self.canvas.bbox(group_id)
+            if bbox:
+                x1, y1, x2, y2 = bbox
+                cx = (x1 + x2) / 2
+                cy = (y1 + y2) / 2
+            else:
+                cx = cy = 0
+
+            orientation = "vertical" if "vertical" in self.canvas.gettags(group_id) else "horizontal"
+            comp_type = logical.type if hasattr(logical, "type") else None
+
+            data["components"].append({
+                "id": group_id,
+                "type": comp_type,
+                "orientation": orientation,
+                "x": cx,
+                "y": cy,
+                "params": logical.__dict__  # si tu lógica es serializable
+            })
+
+        for conn in self.connections:
+            data["connections"].append({
+                "c1": self.port_map[conn["p1"]][0],
+                "p1_index": self.port_map[conn["p1"]][1],
+                "c2": self.port_map[conn["p2"]][0],
+                "p2_index": self.port_map[conn["p2"]][1],
+            })
+
+        return data
+        
+    def load_from_data(self, data):
+        self.canvas.delete("all")
+
+        self.connections.clear()
+        self.port_map.clear()
+        self.component_ports.clear()
+        self.component_map.clear()
+
+        # reconstruir componentes
+        for comp in data["components"]:
+            group_id = self.add_component(
+                x=comp["x"],
+                y=comp["y"],
+                orientation=comp["orientation"],
+                comp_type=comp["type"],
+                component_params=comp["params"]  # recrea la lógica igual
+            )
+
+        # reconstruir conexiones
+        for conn in data["connections"]:
+            c1 = conn["c1"]
+            c2 = conn["c2"]
+            p1 = self.component_ports[c1][conn["p1_index"]]
+            p2 = self.component_ports[c2][conn["p2_index"]]
+
+            x1, y1 = self.get_port_center(p1)
+            x2, y2 = self.get_port_center(p2)
+
+            line = self.canvas.create_line(x1, y1, x2, y2, fill="black")
+
+            self.connections.append({
+                "p1": p1,
+                "p2": p2,
+                "line": line,
+                "c1": c1,
+                "c2": c2
+            })
 
