@@ -1,7 +1,7 @@
 import logging
 from typing import Optional
 
-from workspace import Workspace
+from logic.workspace import Workspace
 
 class Simulator:
     """Simple simulator for the Workspace. Uses logging instead of prints,

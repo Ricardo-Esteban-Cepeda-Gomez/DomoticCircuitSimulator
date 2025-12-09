@@ -7,6 +7,7 @@ class Menubar:
         self.root = root
         self.open_menu = None
         self.closing = False
+        self.controller = None
 
         # Top menubar container
         self.frame = ctk.CTkFrame(root, height=35, fg_color="#ffffff", corner_radius=0)
@@ -73,6 +74,9 @@ class Menubar:
             command=self.toggle_helpmenu
         )
         self.helpbutton.pack(side="left")
+    
+    def set_controller(self, controller):
+        self.controller=controller
 
 
     # ==========================================================
@@ -119,7 +123,7 @@ class Menubar:
 
         menu = self.create_menu(bx, by + self.filebutton.winfo_height())
 
-        for text in ("New (Ctrl+N)", "Open (Ctrl+O)", "Save (Ctrl+S)"):
+        for text in ("Open (Ctrl+O)", "Save (Ctrl+S)"):
             self.create_menu_item(menu, text)
 
         self.enable_close_after_delay(menu, self.filebutton)
@@ -175,7 +179,8 @@ class Menubar:
             text_color="black",
             hover_color="#c5c5c5",
             anchor="w",
-            corner_radius=5
+            corner_radius=5,
+            command= lambda: self.main(text)
         ).pack(padx=5, pady=3)
 
     # ==========================================================
@@ -274,3 +279,7 @@ class Menubar:
         if self.open_menu:
             self.open_menu.place_forget()
             self.open_menu = None
+    def main(self, text):
+        if text == "New (Ctrl+N)":
+            self.controller.save_workspace
+

@@ -1,4 +1,4 @@
-from component import Component
+from logic.components.component import Component
 
 class Led(Component):
     def __init__(self, color: str, max_current: float = 5.0):

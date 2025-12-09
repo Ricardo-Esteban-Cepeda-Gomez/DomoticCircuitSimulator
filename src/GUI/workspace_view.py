@@ -48,7 +48,7 @@ class Workspace():
         self.canvas.bind("<ButtonRelease-1>", self.on_release)
         self.root.bind("<Delete>", self.on_delete)
 
-    def add_component(self, x=50, y=50, orientation="horizontal", comp_type="source"):
+    def add_component(self, x=50, y=50, orientation="horizontal", comp_type="source", component_params=None):
         group_id = f"component_{uuid.uuid4().hex[:8]}"
 
         w, h = 60, 60
@@ -77,34 +77,30 @@ class Workspace():
   
         if self.logic_workspace is not None:
             try:
-           
-                component_params = {}
-                
-                if comp_type == "resistor":
-                    component_params = {"resistance": 100.0, "max_power": 0.25}
-                elif comp_type == "led":
-                    component_params = {"color": "red", "max_current": 5.0}
-                elif comp_type == "switch":
-                    component_params = {"label": f"Switch_{group_id[:8]}"}
-                elif comp_type == "capacitor":
-                    component_params = {"capacitance": 1.0, "voltage_limit": 10.0}
-                elif comp_type == "alarm":
-                    component_params = {"volume": 50, "frequency": 440}
-                elif comp_type == "probe":
-                    component_params = {"mode": "voltage"}
-          
-                
-              
+                # Allow toolbar/controller to pass explicit parameters
+                if component_params is None:
+                    component_params = {}
+                    if comp_type == "resistor":
+                        component_params = {"resistance": 100.0, "max_power": 0.25}
+                    elif comp_type == "led":
+                        component_params = {"color": "red", "max_current": 5.0}
+                    elif comp_type == "switch":
+                        component_params = {"label": f"Switch_{group_id[:8]}"}
+                    elif comp_type == "capacitor":
+                        component_params = {"capacitance": 1.0, "voltage_limit": 10.0}
+                    elif comp_type == "alarm":
+                        component_params = {"volume": 50, "frequency": 440}
+                    elif comp_type == "probe":
+                        component_params = {"mode": "voltage"}
+
                 logical_component = self.logic_workspace.create_component(comp_type, **component_params)
-                
-                
+
                 logical_component.position_x = x
                 logical_component.position_y = y
                 logical_component.rotation = 90 if orientation == "vertical" else 0
-                
-             
+
                 self.component_map[group_id] = logical_component
-                
+
                 print(f"Componente lógico {comp_type} creado: {logical_component}")
             except Exception as e:
                 print(f"Error al crear componente lógico {comp_type}: {e}")
@@ -190,6 +186,16 @@ class Workspace():
                             "c1": c1, "c2": c2}
                 self.connections.append(conn_obj)
 
+                # Registrar la conexión también en la lógica
+                if self.logic_workspace is not None:
+                    lc1 = self.component_map.get(c1)
+                    lc2 = self.component_map.get(c2)
+                    try:
+                        if lc1 is not None and lc2 is not None:
+                            self.logic_workspace.connect(lc1, lc2)
+                    except Exception as e:
+                        print(f"Error al registrar conexión lógica: {e}")
+
               
                 self.canvas.itemconfigure(start_port, fill="black")
                 self.canvas.itemconfigure(end_port, fill="black")
@@ -218,6 +224,17 @@ class Workspace():
             self.drag_data["x"] = event.x
             self.drag_data["y"] = event.y
             self.update_connections(group_tag)
+            # Actualizar posición en el componente lógico
+            logical = self.component_map.get(group_tag)
+            if logical is not None:
+                try:
+                    bbox = self.canvas.bbox(group_tag)
+                    if bbox:
+                        x1, y1, x2, y2 = bbox
+                        logical.position_x = (x1 + x2) / 2
+                        logical.position_y = (y1 + y2) / 2
+                except Exception:
+                    pass
 
         if self.connection_data["start_port"] and self.connection_data["line"]:
             sx, sy = self.get_port_center(self.connection_data["start_port"])
@@ -258,7 +275,21 @@ class Workspace():
                     pass
                 
                 other_port = conn["p2"] if conn["p1"] in ports else conn["p1"]
-                
+
+                # también desconectar la relación lógica si existe
+                try:
+                    if self.logic_workspace is not None:
+                        current_group = conn.get("c1") if conn.get("c1") in (group_tag, ) or conn.get("c2") in (group_tag,) else None
+                        # determinar el otro grupo
+                        other_group = conn.get("c2") if conn.get("c1") == group_tag else conn.get("c1")
+                        if other_group is not None:
+                            lc_current = self.component_map.get(group_tag)
+                            lc_other = self.component_map.get(other_group)
+                            if lc_current is not None and lc_other is not None:
+                                self.logic_workspace.disconnect(lc_current, lc_other)
+                except Exception:
+                    pass
+
                 if conn in self.connections:
                     self.connections.remove(conn)
 
@@ -281,7 +312,10 @@ class Workspace():
         if group_tag in self.component_map:
             logical_component = self.component_map[group_tag]
             if self.logic_workspace is not None:
-                self.logic_workspace.remove_component(logical_component._component__id)
+                try:
+                    self.logic_workspace.remove_component(logical_component.id)
+                except Exception as e:
+                    print(f"Error al eliminar componente lógico: {e}")
             del self.component_map[group_tag]
             print(f"Componente lógico eliminado")
 
