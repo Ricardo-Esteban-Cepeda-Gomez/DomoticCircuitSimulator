@@ -89,7 +89,7 @@ class Workspace():
         for idx, (px, py) in enumerate(port_coords):
             port_tag = f"port_{idx}"
             port_id = self.canvas.create_oval(px-r, py-r, px+r, py+r,
-                                    fill="", outline="black", width=1,
+                                    fill="", outline="", width=0,
                                     tags=(group_id, "port", orientation, comp_type, port_tag))
             self.port_map[port_id] = (group_id, idx)
             ports.append(port_id)
