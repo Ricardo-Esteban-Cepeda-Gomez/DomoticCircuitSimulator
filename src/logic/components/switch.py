@@ -9,8 +9,8 @@ class Switch(Component):
       - allows_current(): True si deja pasar corriente
       - pass_current(current): devuelve la corriente de salida (0 si está abierto)
     """
-    def _init_(self, label: str = "Switch", is_on: bool = False):
-        super()._init_()
+    def __init__(self, label: str = "Switch", is_on: bool = False):
+        super().__init__()
         self.label = label
         self.is_on = is_on
 
