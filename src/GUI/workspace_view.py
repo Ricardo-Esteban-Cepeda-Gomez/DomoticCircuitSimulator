@@ -4,6 +4,8 @@ import os
 from PIL import Image, ImageTk
 import copy
 import traceback
+import time
+import math
 
 class Workspace():
     def __init__(self, root, logic_workspace=None):
@@ -17,11 +19,16 @@ class Workspace():
    
         self.connections = []
 
-     
+        # click tracking to detect click vs drag
+        self._click_start = None
+        self._click_threshold = 6  # pixels
+
+        
         self.port_map = {}          
         self.component_ports = {}    
      
         self.component_map = {}      
+        self.switch_state_labels = {}
 
         base_dir = os.path.dirname(os.path.abspath(__file__))
         images_dir = os.path.join(base_dir, "images")
@@ -117,6 +124,15 @@ class Workspace():
                 self.component_map[group_id] = logical_component
 
                 print(f"Componente lógico {comp_type} creado: {logical_component}")
+                # If this is a switch, create a small visual indicator for ON/OFF
+                try:
+                    if comp_type == "switch":
+                        # small circle above the component: green when ON, red when OFF
+                        color = "green" if getattr(logical_component, "is_on", False) else "red"
+                        label_id = self.canvas.create_oval(x+20, y-40, x+30, y-30, fill=color, outline="", tags=(group_id, "switch_state"))
+                        self.switch_state_labels[group_id] = label_id
+                except Exception:
+                    pass
             except Exception as e:
                 print(f"Error al crear componente lógico {comp_type}: {e}")
         
@@ -150,7 +166,7 @@ class Workspace():
         tags = self.canvas.gettags(top_item)
 
         if "port" in tags:
-         
+            
             if self.connection_data["start_port"] is None:
                 self.connection_data["start_port"] = top_item
                 cx, cy = self.get_port_center(top_item)
@@ -225,20 +241,35 @@ class Workspace():
         if "body" in tags:
             group_tag = next((tag for tag in tags if tag.startswith("component_")), None)
             if group_tag:
-                # record state before potential move so it can be undone
+                # record potential click start (don't start drag yet)
+                self._click_start = {"group_tag": group_tag, "x": event.x, "y": event.y}
+                # record state for undo in case of click action
                 if not self._suppress_history:
                     self.push_undo()
-
-                self.drag_data["item"] = top_item
-                self.drag_data["current_group_tag"] = group_tag
-                self.drag_data["x"] = event.x
-                self.drag_data["y"] = event.y
 
                 orientation = self.get_orientation(top_item)
                 comp_type = self.get_component_type(top_item)
                 print(f"Este componente es {comp_type}, orientación {orientation}")
+                # do not start dragging immediately; on_drag will initiate actual drag if movement occurs
 
     def on_drag(self, event):
+        # If we had a click start but user moved the mouse beyond threshold, start dragging
+        if self._click_start:
+            dx = event.x - self._click_start["x"]
+            dy = event.y - self._click_start["y"]
+            dist = math.hypot(dx, dy)
+            if dist > self._click_threshold:
+                # initialize drag_data from click_start
+                self.drag_data["current_group_tag"] = self._click_start["group_tag"]
+                # find the canvas item for the body to move
+                tags = self.canvas.find_withtag(self._click_start["group_tag"])
+                if tags:
+                    self.drag_data["item"] = tags[0]
+                self.drag_data["x"] = event.x
+                self.drag_data["y"] = event.y
+                # clear click start to indicate drag active
+                self._click_start = None
+
         group_tag = self.drag_data["current_group_tag"]
         if group_tag:
             dx = event.x - self.drag_data["x"]
@@ -276,6 +307,47 @@ class Workspace():
                 self.canvas.coords(conn["line"], x1, y1, x2, y2)
 
     def on_release(self, event):
+        # If there was a click start and no significant movement, treat as click
+        if self._click_start:
+            gx = self._click_start["x"]
+            gy = self._click_start["y"]
+            dist = math.hypot(event.x - gx, event.y - gy)
+            group_tag = self._click_start.get("group_tag")
+            # small movement -> toggle if switch
+            if dist <= self._click_threshold and group_tag:
+                logical = self.component_map.get(group_tag)
+                comp_type = None
+                try:
+                    # determine type from tags
+                    tags = self.canvas.gettags(group_tag)
+                    for t in tags:
+                        if t in ("switch", "source", "resistor", "led", "capacitor", "alarm", "probe"):
+                            comp_type = t
+                            break
+                except Exception:
+                    pass
+                if comp_type == "switch" and logical is not None:
+                    try:
+                        # toggle logical switch
+                        if hasattr(logical, "toggle"):
+                            logical.toggle()
+                        elif hasattr(logical, "set_on"):
+                            logical.set_on(not getattr(logical, "is_on", False))
+                        # update visual indicator
+                        try:
+                            label_id = self.switch_state_labels.get(group_tag)
+                            if label_id is not None:
+                                color = "green" if getattr(logical, "is_on", False) else "red"
+                                self.canvas.itemconfigure(label_id, fill=color)
+                        except Exception:
+                            pass
+                        print(f"Switch {group_tag} toggled -> is_on={getattr(logical, 'is_on', None)}")
+                    except Exception as e:
+                        print(f"Error toggling switch: {e}")
+
+        self._click_start = None
+
+        # reset drag data always
         self.drag_data = {"item": None, "x": 0, "y": 0, "current_group_tag": None}
 
     def on_delete(self, event):
