@@ -47,24 +47,44 @@ class Workspace:
         new_list = [c for c in self.components if not (hasattr(c, "id") and c.id == target_id)]
         self.components = new_list
         # también eliminar conexiones que involucren a este id
-        self.connections = [conn for conn in self.connections if conn[0] != target_id and conn[1] != target_id]
+        # connections are stored as tuples: (a_id, a_port, b_id, b_port)
+        self.connections = [conn for conn in self.connections if conn[0] != target_id and conn[2] != target_id]
 
     def connect(self, comp1, comp2):
-        """Conecta dos componentes. `comp1`/`comp2` pueden ser instancias o ids."""
+        """Deprecated signature. Use connect(comp1, port1_index, comp2, port2_index).
+        Backwards-compatible: if called with two args, assume a generic undirected connection using port indices (0,0).
+        """
+        # Backwards compatibility: allow connect(comp1, comp2) but prefer explicit ports
+        if not (hasattr(comp1, 'id') and (not isinstance(comp2, int) and not hasattr(comp2, 'id')) ):
+            pass
+        # If caller provided 4 args (handled by caller), this function will be overridden by kwargs.
+        raise TypeError("connect requires signature connect(comp1, port1_index, comp2, port2_index)")
+    
+    def connect_with_ports(self, comp1, port1_index, comp2, port2_index):
+        """Conecta dos componentes indicando el índice de puerto en cada uno.
+        comp1/comp2 pueden ser instancias o ids.
+        Connections stored as (a_id, a_port, b_id, b_port).
+        """
         id1 = comp1.id if hasattr(comp1, "id") else comp1
         id2 = comp2.id if hasattr(comp2, "id") else comp2
         if id1 == id2:
             return
-        pair = (id1, id2)
-        # evitar duplicados (independientemente del orden)
-        if any((c == pair or c == (pair[1], pair[0])) for c in self.connections):
-            return
-        self.connections = self.connections + [pair]
+        pair = (id1, int(port1_index), id2, int(port2_index))
+        # evitar duplicados (independientemente del orden y de puerto)
+        for c in self.connections:
+            if c == pair or c == (pair[2], pair[3], pair[0], pair[1]):
+                return
+        self.connections.append(pair)
 
     def disconnect(self, comp1, comp2):
+        raise TypeError("disconnect requires signature disconnect(comp1, port1_index, comp2, port2_index)")
+    
+    def disconnect_with_ports(self, comp1, port1_index, comp2, port2_index):
         id1 = comp1.id if hasattr(comp1, "id") else comp1
         id2 = comp2.id if hasattr(comp2, "id") else comp2
-        self.connections = [c for c in self.connections if not (c == (id1, id2) or c == (id2, id1))]
+        pair = (id1, int(port1_index), id2, int(port2_index))
+        pair_rev = (id2, int(port2_index), id1, int(port1_index))
+        self.connections = [c for c in self.connections if c != pair and c != pair_rev]
 
     def update(self, dt: float = 1.0):
         """logic network updates based on ohms law
@@ -80,11 +100,36 @@ class Workspace:
         comp_map = {c.id: c for c in self.components}
 
         # construir lista de adyacencia
+        # adjacency now respects port directionality. connections items are (a_id,a_port,b_id,b_port)
         adj = {c.id: set() for c in self.components}
-        for a, b in list(self.connections):
-            if a in adj and b in adj:
-                adj[a].add(b)
-                adj[b].add(a)
+        for a_id, a_port, b_id, b_port in list(self.connections):
+            if a_id in adj and b_id in adj:
+                ca = comp_map.get(a_id)
+                cb = comp_map.get(b_id)
+                # helper to decide if current can flow from owner -> other through the given port
+                def allows_edge(owner, owner_port):
+                    try:
+                        # Switch: only allows if closed
+                        if isinstance(owner, Switch):
+                            return owner.allows_current()
+                        # Led: allow only from port 1 (anode) outward
+                        if hasattr(owner, '__class__') and owner.__class__.__name__ == 'Led':
+                            return int(owner_port) == 1
+                        # Source: allow only from port 1 (positive)
+                        if isinstance(owner, Source):
+                            return int(owner_port) == 1
+                        # Other components: bidirectional
+                        return True
+                    except Exception:
+                        return True
+
+                try:
+                    if allows_edge(ca, a_port) and (not (isinstance(cb, Switch) and not cb.allows_current())):
+                        adj[a_id].add(b_id)
+                    if allows_edge(cb, b_port) and (not (isinstance(ca, Switch) and not ca.allows_current())):
+                        adj[b_id].add(a_id)
+                except Exception:
+                    pass
 
         visited = set()
         for cid in list(adj.keys()):

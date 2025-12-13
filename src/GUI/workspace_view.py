@@ -259,7 +259,25 @@ class Workspace():
                     lc2 = self.component_map.get(c2)
                     try:
                         if lc1 is not None and lc2 is not None:
-                            self.logic_workspace.connect(lc1, lc2)
+                            # find port indices
+                            p1_info = self.port_map.get(start_port)
+                            p2_info = self.port_map.get(end_port)
+                            if p1_info is not None and p2_info is not None:
+                                _, p1_idx = p1_info
+                                _, p2_idx = p2_info
+                                try:
+                                    self.logic_workspace.connect_with_ports(lc1, p1_idx, lc2, p2_idx)
+                                except Exception:
+                                    # fall back to legacy connect if not available
+                                    try:
+                                        self.logic_workspace.connect(lc1, lc2)
+                                    except Exception:
+                                        pass
+                            else:
+                                try:
+                                    self.logic_workspace.connect(lc1, lc2)
+                                except Exception:
+                                    pass
                     except Exception as e:
                         print(f"Error al registrar conexión lógica: {e}")
 
@@ -485,7 +503,32 @@ class Workspace():
                             lc_current = self.component_map.get(group_tag)
                             lc_other = self.component_map.get(other_group)
                             if lc_current is not None and lc_other is not None:
-                                self.logic_workspace.disconnect(lc_current, lc_other)
+                                # try to figure port indices from canvas port ids
+                                try:
+                                    p1 = conn.get("p1")
+                                    p2 = conn.get("p2")
+                                    p1_info = self.port_map.get(p1)
+                                    p2_info = self.port_map.get(p2)
+                                    if p1_info is not None and p2_info is not None:
+                                        _, p1_idx = p1_info
+                                        _, p2_idx = p2_info
+                                        try:
+                                            self.logic_workspace.disconnect_with_ports(lc_current, p1_idx, lc_other, p2_idx)
+                                        except Exception:
+                                            try:
+                                                self.logic_workspace.disconnect(lc_current, lc_other)
+                                            except Exception:
+                                                pass
+                                    else:
+                                        try:
+                                            self.logic_workspace.disconnect(lc_current, lc_other)
+                                        except Exception:
+                                            pass
+                                except Exception:
+                                    try:
+                                        self.logic_workspace.disconnect(lc_current, lc_other)
+                                    except Exception:
+                                        pass
                 except Exception:
                     pass
 
