@@ -152,10 +152,16 @@ class Workspace():
                     if comp_type == "led":
                         # Show indicator if logical.state is True or if it has incoming current
                         is_on = bool(getattr(logical_component, "state", False)) or (getattr(logical_component, "input_current", 0.0) > 0)
+                        is_burned = bool(getattr(logical_component, "is_burned", False))
                         r = 8
-                        # create oval but keep it hidden if LED is off
-                        state_opt = "normal" if is_on else "hidden"
-                        label_id = self.canvas.create_oval(x-r, y-r, x+r, y+r, fill="yellow", outline="", state=state_opt, tags=(group_id, "led_state"))
+                        # If burned -> show gray circle; else show yellow only when on
+                        if is_burned:
+                            fill_color = "gray"
+                            state_opt = "normal"
+                        else:
+                            fill_color = "yellow"
+                            state_opt = "normal" if is_on else "hidden"
+                        label_id = self.canvas.create_oval(x-r, y-r, x+r, y+r, fill=fill_color, outline="", state=state_opt, tags=(group_id, "led_state"))
                         self.led_state_labels[group_id] = label_id
                 except Exception:
                     pass
@@ -364,23 +370,32 @@ class Workspace():
                     y = (y1 + y2) / 2
                     r = 8
                     if not label_id:
-                        # create oval; keep hidden if off or burned
-                        is_on = (bool(getattr(logical, "state", False)) or (getattr(logical, "input_current", 0.0) > 0)) and not getattr(logical, "is_burned", False)
-                        state_opt = "normal" if is_on else "hidden"
-                        label_id = self.canvas.create_oval(x-r, y-r, x+r, y+r, fill="yellow", outline="", state=state_opt, tags=(group_id, "led_state"))
+                        # create oval; show gray if burned, yellow if on, hidden otherwise
+                        is_on_flag = (bool(getattr(logical, "state", False)) or (getattr(logical, "input_current", 0.0) > 0))
+                        is_burned_flag = bool(getattr(logical, "is_burned", False))
+                        if is_burned_flag:
+                            fill_color = "gray"
+                            state_opt = "normal"
+                        else:
+                            fill_color = "yellow"
+                            state_opt = "normal" if is_on_flag else "hidden"
+                        label_id = self.canvas.create_oval(x-r, y-r, x+r, y+r, fill=fill_color, outline="", state=state_opt, tags=(group_id, "led_state"))
                         self.led_state_labels[group_id] = label_id
-                        if is_on:
+                        if state_opt == "normal":
                             try:
                                 self.canvas.tag_raise(label_id)
                             except Exception:
                                 pass
                     else:
-                        # mover y actualizar visibilidad; ocultar si quemado
-                        is_on = (bool(getattr(logical, "state", False)) or (getattr(logical, "input_current", 0.0) > 0)) and not getattr(logical, "is_burned", False)
+                        # mover y actualizar visibilidad y color; si quemado mostrar gris
+                        is_on_flag = (bool(getattr(logical, "state", False)) or (getattr(logical, "input_current", 0.0) > 0))
+                        is_burned_flag = bool(getattr(logical, "is_burned", False))
+                        fill_color = "gray" if is_burned_flag else "yellow"
+                        state_opt = "normal" if (is_burned_flag or is_on_flag) else "hidden"
                         self.canvas.coords(label_id, x-r, y-r, x+r, y+r)
                         try:
-                            self.canvas.itemconfigure(label_id, state=("normal" if is_on else "hidden"), fill="yellow")
-                            if is_on:
+                            self.canvas.itemconfigure(label_id, state=state_opt, fill=fill_color)
+                            if state_opt == "normal":
                                 self.canvas.tag_raise(label_id)
                         except Exception:
                             pass
