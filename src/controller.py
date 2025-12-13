@@ -189,6 +189,12 @@ class Controller:
     def update(self):
         """Update simulation each frame."""
         self.simulator.step()  # Works only when simulator.running is True
+        # Refresh LED visual indicators on the GUI workspace if available
+        try:
+            if hasattr(self.gui_workspace, 'update_led_indicators'):
+                self.gui_workspace.update_led_indicators()
+        except Exception:
+            pass
 
     # ================================================================
     # Undo / Redo wrappers (call Workspace methods)

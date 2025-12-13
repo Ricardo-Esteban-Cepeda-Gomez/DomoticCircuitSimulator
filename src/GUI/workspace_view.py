@@ -29,6 +29,7 @@ class Workspace():
      
         self.component_map = {}      
         self.switch_state_labels = {}
+        self.led_state_labels = {}
         # map of group_id -> {'rect': rect_id, 'text': text_id}
         self.property_widgets = {}
         # whether property panels are visible
@@ -144,6 +145,18 @@ class Workspace():
                         color = "green" if getattr(logical_component, "is_on", False) else "red"
                         label_id = self.canvas.create_oval(x+20, y-40, x+30, y-30, fill=color, outline="", tags=(group_id, "switch_state"))
                         self.switch_state_labels[group_id] = label_id
+                except Exception:
+                    pass
+                # LED visual indicator: small yellow circle in the center when on
+                try:
+                    if comp_type == "led":
+                        # Show indicator if logical.state is True or if it has incoming current
+                        is_on = bool(getattr(logical_component, "state", False)) or (getattr(logical_component, "input_current", 0.0) > 0)
+                        r = 8
+                        # create oval but keep it hidden if LED is off
+                        state_opt = "normal" if is_on else "hidden"
+                        label_id = self.canvas.create_oval(x-r, y-r, x+r, y+r, fill="yellow", outline="", state=state_opt, tags=(group_id, "led_state"))
+                        self.led_state_labels[group_id] = label_id
                 except Exception:
                     pass
             except Exception as e:
@@ -328,6 +341,51 @@ class Workspace():
             self.update_property_positions(group_tag)
         except Exception:
             pass
+    
+    def update_led_indicators(self):
+        """Actualizar visualmente los indicadores de los LEDs según el estado lógico."""
+        for group_id, logical in list(self.component_map.items()):
+            try:
+                class_name = logical.__class__.__name__
+                if class_name == "Led" and hasattr(logical, "state"):
+                    # DEBUG: imprimir estado para diagnóstico
+                    try:
+                        print(f"[DEBUG] LED {logical.id} for group {group_id}: state={getattr(logical,'state',None)} input_current={getattr(logical,'input_current',None)} is_burned={getattr(logical,'is_burned',None)}")
+                    except Exception:
+                        pass
+                    # obtener/crear indicador
+                    label_id = self.led_state_labels.get(group_id)
+                    # obtain bounding box of the component and use its center
+                    bbox = self.canvas.bbox(group_id)
+                    if not bbox:
+                        continue
+                    x1, y1, x2, y2 = bbox
+                    x = (x1 + x2) / 2
+                    y = (y1 + y2) / 2
+                    r = 8
+                    if not label_id:
+                        # create oval; keep hidden if off or burned
+                        is_on = (bool(getattr(logical, "state", False)) or (getattr(logical, "input_current", 0.0) > 0)) and not getattr(logical, "is_burned", False)
+                        state_opt = "normal" if is_on else "hidden"
+                        label_id = self.canvas.create_oval(x-r, y-r, x+r, y+r, fill="yellow", outline="", state=state_opt, tags=(group_id, "led_state"))
+                        self.led_state_labels[group_id] = label_id
+                        if is_on:
+                            try:
+                                self.canvas.tag_raise(label_id)
+                            except Exception:
+                                pass
+                    else:
+                        # mover y actualizar visibilidad; ocultar si quemado
+                        is_on = (bool(getattr(logical, "state", False)) or (getattr(logical, "input_current", 0.0) > 0)) and not getattr(logical, "is_burned", False)
+                        self.canvas.coords(label_id, x-r, y-r, x+r, y+r)
+                        try:
+                            self.canvas.itemconfigure(label_id, state=("normal" if is_on else "hidden"), fill="yellow")
+                            if is_on:
+                                self.canvas.tag_raise(label_id)
+                        except Exception:
+                            pass
+            except Exception:
+                pass
 
     def on_release(self, event):
         # If there was a click start and no significant movement, treat as click
@@ -443,6 +501,12 @@ class Workspace():
                 except Exception as e:
                     print(f"Error al eliminar componente lógico: {e}")
             del self.component_map[group_tag]
+            # limpiar indicador de LED si existía
+            try:
+                if group_tag in self.led_state_labels:
+                    del self.led_state_labels[group_tag]
+            except Exception:
+                pass
             print(f"Componente lógico eliminado")
 
       
