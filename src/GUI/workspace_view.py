@@ -563,6 +563,12 @@ class Workspace():
        
         if group_tag in self.component_map:
             logical_component = self.component_map[group_tag]
+            # Apagar la alarma si está sonando antes de eliminar
+            try:
+                if hasattr(logical_component, 'turn_off'):
+                    logical_component.turn_off()
+            except Exception:
+                pass
             if self.logic_workspace is not None:
                 try:
                     self.logic_workspace.remove_component(logical_component.id)

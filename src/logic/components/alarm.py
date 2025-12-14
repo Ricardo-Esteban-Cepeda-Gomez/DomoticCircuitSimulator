@@ -45,6 +45,19 @@ class Alarm(Component):
         if value > 0:
             self.__frequency = int(value)
 
+    def update_state(self, dt: float = None):
+        """Update alarm on each simulation step: turn on if input_current > 0, otherwise turn off."""
+        try:
+            ic = getattr(self, 'input_current', 0.0)
+            if ic and ic > 0:
+                if not self.__is_on:
+                    self.turn_on()
+            else:
+                if self.__is_on:
+                    self.turn_off()
+        except Exception:
+            pass
+
     def turn_on(self):
         """Turn the alarm on and start playback in a separate thread."""
         if self.__is_on:
