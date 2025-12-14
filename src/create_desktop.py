@@ -4,7 +4,7 @@ import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # src/
 PROJECT_DIR = os.path.dirname(BASE_DIR)                # project/
 DIST_DIR = os.path.join(PROJECT_DIR, "dist")
-EXECUTABLE = os.path.join(DIST_DIR, "main")            # nombre normal de PyInstaller
+EXECUTABLE = os.path.join(DIST_DIR, "main")            # PyInstaller normal name
 ICON_PATH = os.path.join(BASE_DIR, "GUI", "images", "bee.png")
 
 # Desktop entry path

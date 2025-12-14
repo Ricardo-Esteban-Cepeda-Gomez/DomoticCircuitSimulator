@@ -19,7 +19,7 @@ class Component(ABC):
         self.is_burned = False
     @property
     def id(self):
-        """ID público (lectura) del componente."""
+        """Public (read-only) ID of the component."""
         return self.__id
 
     def __repr__(self):

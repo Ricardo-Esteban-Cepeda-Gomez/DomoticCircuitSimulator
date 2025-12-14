@@ -14,7 +14,7 @@ class Workspace:
         self.connections = []
 
     def add_component(self, component):
-        """Añade una instancia de componente al workspace lógico."""
+        """Adds a component instance to the logical workspace."""
         self.components = self.components + [component]
 
     def create_component(self, comp_type, **kwargs):
@@ -31,7 +31,7 @@ class Workspace:
         
         ComponentClass = component_map.get(comp_type)
         if ComponentClass is None:
-            raise ValueError(f"Tipo de componente no válido: {comp_type}")
+            raise ValueError(f"Invalid component type: {comp_type}")
         
 
         component = ComponentClass(**kwargs)
@@ -42,11 +42,11 @@ class Workspace:
         return component
 
     def remove_component(self, componentId):
-        # Permite recibir instancia o id
+        # Allows receiving instance or id
         target_id = componentId.id if hasattr(componentId, "id") else componentId
         new_list = [c for c in self.components if not (hasattr(c, "id") and c.id == target_id)]
         self.components = new_list
-        # también eliminar conexiones que involucren a este id
+        # also remove connections that involve this id
         # connections are stored as tuples: (a_id, a_port, b_id, b_port)
         self.connections = [conn for conn in self.connections if conn[0] != target_id and conn[2] != target_id]
 
@@ -61,8 +61,8 @@ class Workspace:
         raise TypeError("connect requires signature connect(comp1, port1_index, comp2, port2_index)")
     
     def connect_with_ports(self, comp1, port1_index, comp2, port2_index):
-        """Conecta dos componentes indicando el índice de puerto en cada uno.
-        comp1/comp2 pueden ser instancias o ids.
+        """Connects two components indicating the port index in each one.
+        comp1/comp2 can be instances or ids.
         Connections stored as (a_id, a_port, b_id, b_port).
         """
         id1 = comp1.id if hasattr(comp1, "id") else comp1
@@ -70,7 +70,7 @@ class Workspace:
         if id1 == id2:
             return
         pair = (id1, int(port1_index), id2, int(port2_index))
-        # evitar duplicados (independientemente del orden y de puerto)
+        # avoid duplicates (regardless of order and port)
         for c in self.connections:
             if c == pair or c == (pair[2], pair[3], pair[0], pair[1]):
                 return
@@ -89,17 +89,17 @@ class Workspace:
     def update(self, dt: float = 1.0):
         """logic network updates based on ohms law
         """
-        # DEBUG: resumen rápido al inicio
+        # DEBUG: quick summary at the beginning
         try:
             print(f"[Workspace] update dt={dt} components={len(self.components)} connections={len(self.connections)}")
             print(f"[Workspace] connections: {self.connections}")
         except Exception:
             pass
 
-        # Mapa id -> instancia
+        # Map id -> instance
         comp_map = {c.id: c for c in self.components}
 
-        # construir lista de adyacencia
+        # adjacency list
         # adjacency now respects port directionality. connections items are (a_id,a_port,b_id,b_port)
         adj = {c.id: set() for c in self.components}
         for a_id, a_port, b_id, b_port in list(self.connections):
@@ -135,7 +135,7 @@ class Workspace:
         for cid in list(adj.keys()):
             if cid in visited:
                 continue
-            # BFS/DFS para obtener todos los nodos del subgrafo
+            # BFS/DFS to get all nodes of the subgraph
             stack = [cid]
             sub_ids = []
             while stack:
@@ -148,27 +148,27 @@ class Workspace:
                     if nb not in visited:
                         stack.append(nb)
 
-            # obtener instancias del subgrafo
+            # get instances of the subgraph
             comps = [comp_map[i] for i in sub_ids if i in comp_map]
 
-            # DEBUG: mostrar subgrafo detectado
+            # DEBUG: show detected subgraph
             try:
                 print(f"[Workspace] subgraph nodes={sub_ids}")
             except Exception:
                 pass
 
-            # detectar fuentes en el subgrafo
+            # detect sources in the subgraph
             sources = [c for c in comps if isinstance(c, Source)]
 
             if len(sources) == 0:
-                # Sin fuente, poner corrientes a 0 y llamar a updates locales si existen
+                # Without source, set currents to 0 and call local updates if they exist
                 for c in comps:
                     c.input_current = 0.0
                     c.output_current = 0.0
-                    # intentar llamar a métodos de actualización if available
+                    # try to call update methods if available
                     try:
                         if hasattr(c, "update_state"):
-                            # algunos update_state aceptan parámetros, otros no
+                            # some update_state accept parameters, others do not
                             try:
                                 c.update_state(0.0)
                             except TypeError:
@@ -182,52 +182,52 @@ class Workspace:
                         pass
                 continue
 
-            # si hay más de una fuente, usar la primera y loggear (no crash)
+            # if there is more than one source, use the first and log (no crash)
             source = sources[0]
             V = getattr(source, "voltage", 0.0)
 
-            # calcular resistencia total en el subgrafo (suma de resistores)
+            # calculate total resistance in the subgraph (sum of resistors)
             resistors = [c for c in comps if isinstance(c, Resistor)]
             total_R = sum(getattr(r, "resistance", 0.0) for r in resistors)
             if total_R <= 0.0:
-                # fallback seguro para evitar división por cero
+                # safe fallback to avoid division by zero
                 total_R = 1.0
 
-            # corriente en serie (aprox): I = V / R_total
+            # series current (approx): I = V / R_total
             I = V / total_R
 
-            # DEBUG: mostrar fuente y corriente calculada
+            # DEBUG: show source and calculated current
             try:
                 print(f"[Workspace] source_id={source.id} V={V} total_R={total_R} I={I}")
             except Exception:
                 pass
 
-            # asignar corriente a la fuente
+            # assign current to the source
             try:
                 source.current = I
                 source.output_current = I
             except Exception:
                 pass
 
-            # actualizar resistores (les pasamos la caída de tensión esperada)
+            # update resistors (we pass them the expected voltage drop)
             for r in resistors:
                 try:
                     Vr = I * getattr(r, "resistance", 0.0)
-                    # Resistor.update_state espera input_voltage
+                    # Resistor.update_state waits for input_voltage
                     r.update_state(Vr)
                 except Exception:
-                    # intentar llamada sin args si firma difiere
+                    # try calling
                     try:
                         r.update_state()
                     except Exception:
                         pass
 
-            # LEDs: aplicar corriente entrante y actualizar
+            # LEDs: apply input current and update
             leds = [c for c in comps if isinstance(c, Led)]
             for led in leds:
                 try:
                     led.input_current = I
-                    # algunos leds usan update_state()
+                    # some leds use update_state()
                     if hasattr(led, "update_state"):
                         try:
                             led.update_state()
@@ -236,7 +236,7 @@ class Workspace:
                 except Exception:
                     pass
 
-            # Capacitores: pasar corriente de carga y actualizar
+            # Capacitors
             caps = [c for c in comps if isinstance(c, Capacitor)]
             for cap in caps:
                 try:
@@ -246,7 +246,7 @@ class Workspace:
                 except Exception:
                     pass
 
-            # Alarms: encender si hay corriente
+            # Alarms: on if theres current
             alarms = [c for c in comps if isinstance(c, Alarm)]
             for a in alarms:
                 try:
@@ -257,7 +257,7 @@ class Workspace:
                 except Exception:
                     pass
 
-            # Probes: conectar y medir la primera componente (ej. la fuente)
+            # Probes: connect and measure the first component (e.g. the source)
             probes = [c for c in comps if isinstance(c, Probes)]
             for p in probes:
                 try:
@@ -267,7 +267,7 @@ class Workspace:
                     pass
 
     def simulate(self):
-        # simple wrapper para compatibilidad: actualiza con paso por defecto
+        # simple wrapper for compatibility 
         try:
             self.update(1.0)
         except Exception:

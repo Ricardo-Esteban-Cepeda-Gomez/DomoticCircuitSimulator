@@ -49,7 +49,7 @@ else:
 
 menu_bar = Menubar(root)          # Top menu bar
 tool_bar = Toolbar(root)          # Toolbar
-# Crear workspace lógico y pasarlo a la vista para sincronización
+# Create logical workspace and pass it to the view for synchronization
 logic_workspace = LogicWorkspace()
 workspace = GUIWorkspace(root, logic_workspace=logic_workspace)       # Main drawing/work area (GUI)
 statusbar = Statusbar(root, )       # Bottom bar

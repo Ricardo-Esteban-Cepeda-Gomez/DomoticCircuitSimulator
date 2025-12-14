@@ -133,7 +133,7 @@ class Workspace():
 
                 self.component_map[group_id] = logical_component
 
-                # Crear y mostrar panel de propiedades junto al componente recién creado
+                # Create and show properties panel next to the newly created component
                 try:
                     self.show_properties(group_id)
                 except Exception:
@@ -255,7 +255,7 @@ class Workspace():
                             "c1": c1, "c2": c2}
                 self.connections.append(conn_obj)
 
-                # Registrar la conexión también en la lógica
+                # Register the connection also in the logic
                 if self.logic_workspace is not None:
                     lc1 = self.component_map.get(c1)
                     lc2 = self.component_map.get(c2)
@@ -343,7 +343,7 @@ class Workspace():
                 self.update_property_positions(group_tag)
             except Exception:
                 pass
-            # Actualizar posición en el componente lógico
+            # Update position in the logical component
             logical = self.component_map.get(group_tag)
             if logical is not None:
                 try:
@@ -377,17 +377,17 @@ class Workspace():
             pass
     
     def update_led_indicators(self):
-        """Actualizar visualmente los indicadores de los LEDs según el estado lógico."""
+        """Update the LED indicators visually according to the logical state."""
         for group_id, logical in list(self.component_map.items()):
             try:
                 class_name = logical.__class__.__name__
                 if class_name == "Led" and hasattr(logical, "state"):
-                    # DEBUG: imprimir estado para diagnóstico
+                    # DEBUG: print state for diagnosis
                     try:
                         print(f"[DEBUG] LED {logical.id} for group {group_id}: state={getattr(logical,'state',None)} input_current={getattr(logical,'input_current',None)} is_burned={getattr(logical,'is_burned',None)}")
                     except Exception:
                         pass
-                    # obtener/crear indicador
+                    # get/create indicator
                     label_id = self.led_state_labels.get(group_id)
                     # obtain bounding box of the component and use its center
                     bbox = self.canvas.bbox(group_id)
@@ -503,7 +503,7 @@ class Workspace():
                 
                 other_port = conn["p2"] if conn["p1"] in ports else conn["p1"]
 
-                # también desconectar la relación lógica si existe
+                # also disconnect the logical relationship if it exists
                 try:
                     if self.logic_workspace is not None:
                         current_group = conn.get("c1") if conn.get("c1") in (group_tag, ) or conn.get("c2") in (group_tag,) else None
@@ -563,7 +563,7 @@ class Workspace():
        
         if group_tag in self.component_map:
             logical_component = self.component_map[group_tag]
-            # Apagar la alarma si está sonando antes de eliminar
+            # Turn off the alarm if it is sounding before deleting
             try:
                 if hasattr(logical_component, 'turn_off'):
                     logical_component.turn_off()
@@ -575,7 +575,7 @@ class Workspace():
                 except Exception as e:
                     print(f"Error al eliminar componente lógico: {e}")
             del self.component_map[group_tag]
-            # limpiar indicador de LED si existía
+            # clean up LED indicator if it existed
             try:
                 if group_tag in self.led_state_labels:
                     del self.led_state_labels[group_tag]
@@ -609,7 +609,7 @@ class Workspace():
 
             orientation = "vertical" if "vertical" in self.canvas.gettags(group_id) else "horizontal"
             
-            # Obtener el tipo de componente del nombre de la clase
+            # Get the component type from the class name
             class_name = logical.__class__.__name__
             comp_type_map = {
                 "Source": "source",
@@ -622,7 +622,7 @@ class Workspace():
             }
             comp_type = comp_type_map.get(class_name)
 
-            # Extraer solo los parámetros serializables básicos
+            # Extract only the basic serializable parameters
             params = {}
             if comp_type == "resistor" and hasattr(logical, "resistance"):
                 params = {"resistance": logical.resistance}
@@ -664,7 +664,7 @@ class Workspace():
         return data
         
     def load_from_data(self, data):
-        """Carga componentes y conexiones guardadas."""
+        """Load saved components and connections."""
         self.canvas.delete("all")
 
         self.connections.clear()
@@ -672,14 +672,14 @@ class Workspace():
         self.component_ports.clear()
         self.component_map.clear()
 
-        # Mapeo para reasignar IDs de componentes del archivo a IDs generados
+        # Mapping to reassign component IDs from file to generated IDs
         id_mapping = {}
 
-        # Reconstruir componentes
+        # Rebuild components
         for comp in data["components"]:
             original_id = comp["id"]
             
-            # Crear el componente (add_component genera un nuevo UUID)
+            # Create the component (add_component generates a new UUID)
             comp_params = comp.get("params", {}) or {}
             # remove runtime-only params (like is_on) before passing to constructor
             ctor_params = {k: v for k, v in comp_params.items() if k != "is_on"}
@@ -802,31 +802,31 @@ class Workspace():
         return "break"
 
     def show_properties(self, group_id):
-        """Crea y muestra el panel de propiedades para el componente dado."""
+        """Creates and shows the properties panel for the given component."""
         # Respect visibility flag
         if not getattr(self, 'properties_visible', True):
             return
 
         if group_id in self.property_widgets:
-            return  # ya existe un panel de propiedades para este componente
+            return  # a properties panel for this component already exists
 
         x, y = self.canvas.coords(group_id)
-        x += 70  # offset a la derecha del componente
-        y -= 30  # offset hacia arriba
+        x += 70  # offset to the right of the component
+        y -= 30  # offset towards the top
 
-        # crear un rectángulo semitransparente como fondo
+        # create a semi-transparent rectangle as background
         rect_id = self.canvas.create_rectangle(x-5, y-5, x+155, y+55, fill="#ffffff", outline="#000000", tags=(group_id, "property_panel"))
 
-        # texto de propiedades (inicialmente vacío)
+        # properties text (initially empty)
         text_id = self.canvas.create_text(x+75, y+25, text="", fill="#000000", tags=(group_id, "property_text"))
 
         self.property_widgets[group_id] = {'rect': rect_id, 'text': text_id}
 
-        # actualizar texto con las propiedades actuales del componente
+        # update text with the current properties of the component
         self.update_properties_text(group_id)
 
     def update_properties_text(self, group_id):
-        """Actualiza el texto del panel de propiedades con la información actual del componente."""
+        """Updates the properties panel text with the current component information."""
         if group_id not in self.property_widgets:
             return
 
@@ -843,24 +843,24 @@ class Workspace():
 
 
             if class_name == "Source" and hasattr(logical, "voltage"):
-                props.append(f"Tensión: {logical.voltage} V")
+                props.append(f"Voltage: {logical.voltage} V")
             elif class_name == "Resistor" and hasattr(logical, "resistance"):
-                props.append(f"Resistencia: {logical.resistance} Ω")
+                props.append(f"Resistance: {logical.resistance} Ω")
             elif class_name == "Led" and hasattr(logical, "color"):
                 props.append(f"Color: {logical.color}")
             elif class_name == "Switch" and hasattr(logical, "label"):
-                props.append(f"Etiqueta: {logical.label}")
+                props.append(f"Label: {logical.label}")
             elif class_name == "Capacitor" and hasattr(logical, "capacitance"):
-                props.append(f"Capacitancia: {logical.capacitance} F")
+                props.append(f"Capacitance: {logical.capacitance} F")
             elif class_name == "Alarm" and hasattr(logical, "frequency"):
-                props.append(f"Frecuencia: {logical.frequency} Hz")
-                # también mostrar volumen y estado encendido/apagado
+                props.append(f"Frecuency: {logical.frequency} Hz")
+                # also show volume and on/off state
                 if hasattr(logical, "volume"):
-                    props.append(f"Volumen: {logical.volume}")
+                    props.append(f"Volume: {logical.volume}")
                 if hasattr(logical, "is_on"):
-                    props.append(f"Encendido: {'Sí' if logical.is_on else 'No'}")
+                    props.append(f"Is on: {'Yes' if logical.is_on else 'No'}")
             elif class_name == "Probe" and hasattr(logical, "mode"):
-                props.append(f"Modo: {logical.mode}")
+                props.append(f"Mode: {logical.mode}")
 
         # unir propiedades en un solo texto
         props_text = "\n".join(props)
@@ -869,34 +869,34 @@ class Workspace():
         text_id = self.property_widgets[group_id]['text']
         self.canvas.itemconfig(text_id, text=props_text)
 
-        # mover el panel de propiedades para que esté cerca del componente
+        # move the properties panel to be near the component
         self.refresh_property_position(group_id)
 
     def refresh_property_position(self, group_id):
-        """Actualiza la posición del panel de propiedades para que esté cerca del componente."""
+        """Updates the position of the properties panel to be near the component."""
         if group_id not in self.property_widgets:
             return
 
         x, y = self.canvas.coords(group_id)
-        x += 70  # offset a la derecha del componente
-        y -= 30  # offset hacia arriba
+        x += 70  # offset to the right of the component
+        y -= 30  # offset towards the top
 
         rect_id = self.property_widgets[group_id]['rect']
         text_id = self.property_widgets[group_id]['text']
 
-        # mover el rectángulo y el texto
+        # move the rectangle and the text
         self.canvas.coords(rect_id, x-5, y-5, x+155, y+55)
         self.canvas.coords(text_id, x+75, y+25)
 
     def update_property_positions(self, group_tag):
-        """Actualiza las posiciones de los paneles de propiedades para los componentes dados."""
+        """Updates the positions of the properties panels for the given components."""
         for group_id in self.component_ports:
             if group_id == group_tag or group_tag in self.component_ports[group_id]:
-                # actualizar posición del panel de propiedades
+                # update position of the properties panel
                 self.refresh_property_position(group_id)
 
     def toggle_properties(self, event=None):
-        """Alterna la visibilidad de todos los paneles de propiedades."""
+        """Toggles the visibility of all properties panels."""
         self.properties_visible = not getattr(self, 'properties_visible', True)
         if self.properties_visible:
             self.show_all_properties()
@@ -904,7 +904,7 @@ class Workspace():
             self.hide_all_properties()
 
     def hide_all_properties(self):
-        """Oculta todos los paneles de propiedades actuales (sin eliminarlos)."""
+        """Hides all current properties panels (without deleting them)."""
         for gw in list(self.property_widgets.values()):
             try:
                 self.canvas.itemconfigure(gw['rect'], state='hidden')
@@ -913,19 +913,19 @@ class Workspace():
                 pass
 
     def show_all_properties(self):
-        """Muestra (o recrea) todos los paneles de propiedades existentes y actualiza su texto y posición."""
+        """Shows (or recreates) all existing properties panels and updates their text and position."""
         for gid, gw in list(self.property_widgets.items()):
             try:
                 self.canvas.itemconfigure(gw['rect'], state='normal')
                 self.canvas.itemconfigure(gw['text'], state='normal')
-                # actualizar posición y texto
+                # update position and text
                 self.refresh_property_position(gid)
                 self.update_properties_text(gid)
             except Exception:
                 pass
 
     def remove_properties(self, group_id):
-        """Elimina el panel de propiedades para el componente dado."""
+        """Removes the properties panel for the given component."""
         if group_id in self.property_widgets:
             rect_id = self.property_widgets[group_id]['rect']
             text_id = self.property_widgets[group_id]['text']

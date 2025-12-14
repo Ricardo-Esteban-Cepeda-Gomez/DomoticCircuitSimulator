@@ -1079,7 +1079,7 @@ class Toolbar:
 
         self.frame.configure(height=new_height)
 
-    # --- Lista de todos los botones y sus imágenes ---
+    # --- List of all buttons and their images ---
         items = [
             (self.Bee_button, self.bee_image),
             (self.Battery_button, self.battery_image),
@@ -1121,12 +1121,12 @@ class Toolbar:
             (self.Back_probe, self.back_probe_image),
         ]
 
-    # --- Asigna el tamaño dinámicamente ---
+    # --- Assign size dynamically ---
         for button, image in items:
             button.configure(height=button_size, width=button_size)
             image.configure(size=(img_size, img_size))
 
-        # --- Otros frames dinámicos ---
+        # --- Other dynamic frames ---
         self.battery_creation_frame.configure(height=button_size)
         self.resistor_creation_frame.configure(height=button_size)
         self.capacitor_creation_frame.configure(height=button_size)
@@ -1258,18 +1258,18 @@ class Tooltip:
         )
         label.pack()
 
-        # Inicialmente invisible
+        # Initially invisible
         self.alpha = 0
         tw.attributes("-alpha", self.alpha)
 
         # Iniciar fade in
         self.fade_in_start_time = self.widget.winfo_toplevel().after(10, self.fade_in_step)
 
-        # Monitorear si el mouse sigue sobre el widget
+        # Monitor if the mouse is still over the widget
         self.check_mouse_leave()
 
     def fade_in_step(self):
-        """Incrementa alpha hasta 1 para fade in"""
+        """Increases alpha to 1 for fade in"""
         if self.tip_window is None:
             return
 
@@ -1280,11 +1280,11 @@ class Tooltip:
             self.tip_window.attributes("-alpha", self.alpha)
             return
         self.tip_window.attributes("-alpha", self.alpha)
-        # siguiente paso en 20ms
+        # next step in 20ms
         self.tip_window.after(20, self.fade_in_step)
 
     def check_mouse_leave(self):
-        """Cerrar tooltip si el mouse ya no está sobre el widget."""
+        """Close tooltip if the mouse is no longer over the widget."""
         if self.tip_window is None:
             return
 
@@ -1293,7 +1293,7 @@ class Tooltip:
             self.hide_tooltip()
             return
 
-        # sigue adentro → volver a verificar en 50ms
+        # still inside → check again in 50ms
         self.widget.after(50, self.check_mouse_leave)
 
     def hide_tooltip(self):
