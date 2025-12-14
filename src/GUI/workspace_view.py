@@ -34,6 +34,8 @@ class Workspace():
         self.property_widgets = {}
         # whether property panels are visible
         self.properties_visible = True
+        # deletion mode (activated by bee tool)
+        self.delete_mode = False
 
         base_dir = os.path.dirname(os.path.abspath(__file__))
         images_dir = os.path.join(base_dir, "images")
@@ -97,7 +99,7 @@ class Workspace():
         for idx, (px, py) in enumerate(port_coords):
             port_tag = f"port_{idx}"
             port_id = self.canvas.create_oval(px-r, py-r, px+r, py+r,
-                                    fill="", outline="", width=0,
+                                    fill="gray", outline="", width=0,
                                     tags=(group_id, "port", orientation, comp_type, port_tag))
             self.port_map[port_id] = (group_id, idx)
             ports.append(port_id)
@@ -291,6 +293,14 @@ class Workspace():
         if "body" in tags:
             group_tag = next((tag for tag in tags if tag.startswith("component_")), None)
             if group_tag:
+                # If delete mode is active, delete immediately on click
+                if getattr(self, 'delete_mode', False):
+                    try:
+                        self.delete_component(group_tag)
+                    except Exception:
+                        pass
+                    return
+
                 # record potential click start (don't start drag yet)
                 self._click_start = {"group_tag": group_tag, "x": event.x, "y": event.y}
                 # record state for undo in case of click action

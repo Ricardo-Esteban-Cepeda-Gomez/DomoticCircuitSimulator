@@ -67,6 +67,27 @@ class Controller:
         Allows toolbar to call controller without depending on internal methods.
         """
         print(f"[Controller] action='{action_component}', data={data}")
+        # --- Bee (delete) tool: toggle delete mode in GUI workspace ---
+        if action_component == "bee":
+            try:
+                current = getattr(self.gui_workspace, "delete_mode", False)
+                # toggle
+                self.gui_workspace.delete_mode = not current
+                # change cursor to give user feedback
+                try:
+                    cur = "X_cursor" if not current else ""
+                    self.gui_workspace.canvas.config(cursor=cur)
+                except Exception:
+                    pass
+                # show status message
+                try:
+                    if self.statusbar:
+                        self.statusbar.show(f"Delete mode: {'ON' if not current else 'OFF'}")
+                except Exception:
+                    pass
+            except Exception:
+                pass
+            return
         # --- Simulation actions ----------------------------------------
         if action_component == "play":
             self.statusbar.update_status()
@@ -119,6 +140,22 @@ class Controller:
         except Exception:
             pass
 
+        # If any component-creation action is selected, disable delete mode
+        try:
+            if getattr(self.gui_workspace, 'delete_mode', False):
+                self.gui_workspace.delete_mode = False
+                try:
+                    self.gui_workspace.canvas.config(cursor='')
+                except Exception:
+                    pass
+                try:
+                    if self.statusbar:
+                        self.statusbar.show("")
+                except Exception:
+                    pass
+        except Exception:
+            pass
+
         # Prepare creation kwargs depending on component type
         param_key_map = {
             "resistor": "resistance",
@@ -150,6 +187,8 @@ class Controller:
                         logical.voltage = params["value"]
                     elif not isinstance(params, dict) and params is not None:
                         logical.voltage = params
+                    # Update the properties text to reflect the new voltage
+                    self.gui_workspace.update_properties_text(group_id)
         except Exception as e:
             print(f"[Controller] Error creating component {comp_type}: {e}")
 
